@@ -16,6 +16,7 @@ class Player extends FlxSprite
 {
 	// A constant to represent how fast the player can move.
 	static inline var MOVEMENT_SPEED:Float = 450;
+	var intialSpeed:Float = 50;
 	var velocityTween:VarTween;
 
 
@@ -81,6 +82,16 @@ class Player extends FlxSprite
 		{
 			var newAngle:Float = 0;
 
+			if(intialSpeed < MOVEMENT_SPEED)
+			{
+				intialSpeed += 15;
+			}
+	
+			if(intialSpeed >= MOVEMENT_SPEED)
+			{
+				intialSpeed = MOVEMENT_SPEED;
+			}
+
 			// If moving, play the walk animation.
 			this.animation.play("walk");
 	
@@ -121,7 +132,7 @@ class Player extends FlxSprite
 				this.flipX = false; // Do not flip (or unflip) when moving right
 			}
 	
-			velocity.set(MOVEMENT_SPEED, 0);
+			velocity.set(intialSpeed, 0);
 			velocity.rotate(FlxPoint.weak(0, 0), newAngle);
 		}
 		else
@@ -129,6 +140,8 @@ class Player extends FlxSprite
 			// If not moving, revert back to the idle animation.
 			this.animation.play("idle");
 			//Actuate.tween(this, 2, {MOVEMENT_SPEED: 0}).ease(Quad.easeOut);
+
+			intialSpeed = 100;
 		}
 	}
 }
