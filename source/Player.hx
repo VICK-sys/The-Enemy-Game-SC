@@ -7,7 +7,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.tweens.misc.VarTween;
 import flixel.tweens.FlxEase;
-
+//import motion.Actuate;
 
 /**
  * Class to represent the player character.
@@ -30,13 +30,7 @@ class Player extends FlxSprite
 	{
 		super(x, y);
 
-		// Give the player a temporary orange square to represent it.
-		//makeGraphic(20, 20, FlxColor.ORANGE);
-
-        // Load the sprite sheet and XML data
-		//var xmlData:Xml = Xml.parse(Assets.getText("assets/images/mufu.xml"));
-		this.loadGraphic("assets/images/mufu.png", true, 20, 23); // Adjust the numbers to your frame width and height.
-		//mySprite.loadGraphic("assets/images/mufu.png", true);
+		this.loadGraphic("assets/images/mufu.png", true, 20, 23);
 		this.frames = FlxAtlasFrames.fromSparrow("assets/images/mufu.png", "assets/images/mufu.xml");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
 		this.animation.addByPrefix("walk", "Run", 12, true);
@@ -46,7 +40,7 @@ class Player extends FlxSprite
 		this.antialiasing = false;
 		this.scale.set(3, 3);
 
-		drag.x = drag.y = 1600;
+		drag.x = drag.y = 700;
 	}
 
 	override function update(elapsed:Float)
@@ -56,10 +50,6 @@ class Player extends FlxSprite
 		super.update(elapsed);
 	}
 
-	/**
-	 * Handle's player movement based on the user's input. This function is
-	 * from the Haxe Flixel tutorial at https://haxeflixel.com/documentation/groundwork/
-	 */
 	private function movement()
 	{
 		// Initial variable setup to represent the direction in which the
@@ -88,61 +78,57 @@ class Player extends FlxSprite
 		}
 
 		if (up || down || left || right)
+		{
+			var newAngle:Float = 0;
+
+			// If moving, play the walk animation.
+			this.animation.play("walk");
+	
+			if (up)
 			{
-				var newAngle:Float = 0;
-		
-				if (up)
+				newAngle = -90;
+	
+				if (left)
 				{
-					newAngle = -90;
-		
-					if (left)
-					{
-						newAngle -= 45;	
-					}
-					else if (right)
-					{
-						newAngle += 45;
-					}
-				}
-				else if (down)
-				{
-					newAngle = 90;
-		
-					if (left)
-					{
-						newAngle += 45;
-					}
-					else if (right)
-					{
-						newAngle -= 45;
-					}
-				}
-				else if (left)
-				{
-					newAngle = 180;
-					this.flipX = true;  // Flip the sprite when moving left
+					newAngle -= 45;	
 				}
 				else if (right)
 				{
-					newAngle = 0;
-					this.flipX = false; // Do not flip (or unflip) when moving right
+					newAngle += 45;
 				}
-		
-				velocity.set(MOVEMENT_SPEED, 0);
-				velocity.rotate(FlxPoint.weak(0, 0), newAngle);
 			}
-		
-			// Check if the character is moving.
-			if (up || down || left || right)
+			else if (down)
 			{
-				// If moving, play the walk animation.
-				this.animation.play("walk");
-				// ... [rest of the direction calculation and velocity setting code remains the same]
+				newAngle = 90;
+	
+				if (left)
+				{
+					newAngle += 45;
+				}
+				else if (right)
+				{
+					newAngle -= 45;
+				}
 			}
-			else
+			else if (left)
 			{
-				// If not moving, revert back to the idle animation.
-				this.animation.play("idle");
+				newAngle = 180;
+				this.flipX = true;  // Flip the sprite when moving left
 			}
+			else if (right)
+			{
+				newAngle = 0;
+				this.flipX = false; // Do not flip (or unflip) when moving right
+			}
+	
+			velocity.set(MOVEMENT_SPEED, 0);
+			velocity.rotate(FlxPoint.weak(0, 0), newAngle);
+		}
+		else
+		{
+			// If not moving, revert back to the idle animation.
+			this.animation.play("idle");
+			//Actuate.tween(this, 2, {MOVEMENT_SPEED: 0}).ease(Quad.easeOut);
 		}
 	}
+}
