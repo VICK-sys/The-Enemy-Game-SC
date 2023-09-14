@@ -7,6 +7,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.tweens.misc.VarTween;
 import flixel.tweens.FlxEase;
+import flixel.system.FlxSound;
 //import motion.Actuate;
 
 /**
@@ -18,6 +19,7 @@ class Player extends FlxSprite
 	static inline var MOVEMENT_SPEED:Float = 450;
 	var intialSpeed:Float = 50;
 	var velocityTween:VarTween;
+	private var walkingSound:FlxSound;
 
 
 	/**
@@ -39,7 +41,7 @@ class Player extends FlxSprite
 		this.animation.addByPrefix("death", "Death", 12, true);
 		this.animation.play("idle", true);
 		this.antialiasing = false;
-		this.scale.set(3, 3);
+		this.scale.set(4, 4);
 
 		drag.x = drag.y = 700;
 	}
@@ -81,6 +83,9 @@ class Player extends FlxSprite
 		if (up || down || left || right)
 		{
 			var newAngle:Float = 0;
+
+			walkingSound = FlxG.sound.load("assets/sounds/walk1.ogg");
+			walkingSound.play();
 
 			if(intialSpeed < MOVEMENT_SPEED)
 			{

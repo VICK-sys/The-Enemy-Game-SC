@@ -4,6 +4,9 @@ import flixel.FlxState;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.input.mouse.FlxMouseButton;
+import flixel.util.FlxTimer;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 
 
 class PlayState extends FlxState
@@ -13,6 +16,8 @@ class PlayState extends FlxState
 	private var _player:Player;
 	private var _follower:Follower;
 	private var _background:FlxSprite;
+	private var _shadowPlayer:FlxSprite;
+	private var _shadowPlayer2:FlxSprite;
 	private var weapon:FlxSprite;
 	var startAttackAngle:Float;
 
@@ -33,17 +38,25 @@ class PlayState extends FlxState
 		_player = new Player(50, 50);
 		// Add the player to the scene.
 
+		_shadowPlayer = new FlxSprite(_player.x + 10, _player.y + 48, "assets/images/shadow.png");
+		_shadowPlayer.scale.set(4, 4);
+
 		_follower = new Follower(100, 100);  // Starting position of follower
 		_follower.target = _player;          // Set the player as the target to follow
-		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/mufu_scythe.png");  // Initializing weapon above the player for this example
-		weapon.scale.set(3, 3);
 
+		_shadowPlayer2 = new FlxSprite(_follower.x + 10, _follower.y + 48, "assets/images/shadow.png");
+		_shadowPlayer2.scale.set(4, 4);
+
+		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/mufu_scythe.png");  // Initializing weapon above the player for this example
+		weapon.scale.set(4, 4);
+
+		add(_shadowPlayer2);
 		add(_follower);
+		add(_shadowPlayer);
 		add(_player);
 		add(weapon);
 
-		weapon.origin.set(weapon.width, weapon.height);
-
+		weapon.origin.set(weapon.width * 0.5, weapon.height);
 
 		super.create();
 	}
@@ -51,6 +64,20 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
+
+		updateWeaponPositionXY(_player, weapon);
+
+		_shadowPlayer.x = _player.x + 10;
+		_shadowPlayer.y = _player.y + 72;
+
+		_shadowPlayer2.x = _follower.x + 10;
+		_shadowPlayer2.y = _follower.y + 72;
+
+		// Update weapon position based on mouse and player
+		if(!isAttacking)
+		{
+			updateWeaponPosition(FlxG.mouse.screenX, FlxG.mouse.screenY, _player, weapon);
+		}
 	
 		// Check for a single mouse click to start the attack
 		if (FlxG.mouse.justPressed && !isAttacking)
@@ -58,30 +85,29 @@ class PlayState extends FlxState
 			isAttacking = true;
 			
 			// Store the current angle as the starting angle for the attack
-			var startAttackAngle:Float = weapon.angle;
-		}
-	
-		if (isAttacking)
-		{
-			// Rotate the weapon smoothly for the attack in the clockwise direction
-			weapon.angle += attackSpeed * elapsed;
+			//var startAttackAngle:Float = weapon.angle;
 			
-			// Stop the attack after reaching the desired angle (90-degree swing)
-			if (Math.abs(weapon.angle + startAttackAngle) >= attackAngle)
+			weapon.angle += 120;
+
+			if(weapon.flipX == true)
+			{
+				weapon.flipX = false;
+			}
+			else
+			{
+				weapon.flipX = true;
+			}
+
+			new FlxTimer().start(0.15, function(tmr:FlxTimer)
 			{
 				isAttacking = false;
-			}
-		}
-		else
-		{
-			// Update weapon position based on mouse and player
-			updateWeaponPosition(FlxG.mouse.screenX, FlxG.mouse.screenY, _player, weapon);
+			});
 		}
 	}	
 	
 	function updateWeaponPosition(mouseX:Float, mouseY:Float, _player:Player, weapon:FlxSprite):Void 
 	{
-		// Calculate the angle
+		// Calculate the angle   
 		var dy:Float = mouseY - _player.y;
 		var dx:Float = mouseX - _player.x;
 		var theta:Float = Math.atan2(dy, dx);
@@ -90,8 +116,16 @@ class PlayState extends FlxState
 		weapon.angle = theta * (180 / Math.PI);  // Convert the angle from radians to degrees
 	
 		// Position the weapon
-		var distanceFromPlayer:Float = 50;  // Adjust this value based on your game's needs
-		weapon.x = _player.x + distanceFromPlayer * Math.cos(theta) - weapon.origin.x + 18;
+		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
+		weapon.x = _player.x + distanceFromPlayer * Math.cos(theta) - weapon.origin.x + 17;
 		weapon.y = _player.y + distanceFromPlayer * Math.sin(theta) - weapon.origin.y + 45;
-	}	
+	}
+
+	function updateWeaponPositionXY(_player:Player, weapon:FlxSprite):Void 
+	{ 
+		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
+		weapon.x = _player.x + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.x + 17;
+		weapon.y = _player.y + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.y + 45;
+	}
+		
 }

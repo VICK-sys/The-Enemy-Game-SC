@@ -6,7 +6,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 
 class Follower extends FlxSprite
 {
-    static inline var SPEED:Float = 200;
+    static inline var SPEED:Float = 300;
     public var target:Player;
 	static inline var STOP_THRESHOLD:Float = 70;
 	
@@ -22,7 +22,7 @@ class Follower extends FlxSprite
 		this.animation.addByPrefix("hurt", "Hurt", 12, true);
 		this.animation.addByPrefix("death", "Death", 12, true);
 		this.antialiasing = false;
-		this.scale.set(3, 3);
+		this.scale.set(4, 4);
     }
 
 	override public function update(elapsed:Float):Void
