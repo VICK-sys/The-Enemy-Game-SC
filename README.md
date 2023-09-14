@@ -1,6 +1,5 @@
-# Haxe-Flixel-Tutorial
-An introductory tutorial on how to use Haxe Flixel
+# THE ENEMY
 
-In this tutorial we added player movement controls.
-
-![Preview Picture](https://github.com/Wolfman13/Haxe-Flixel-Tutorial/blob/Tutorial-1/Tutorial_1.png?raw=true)
+TODO:
+-![Preview Picture](https://cdn.discordapp.com/attachments/883567906821111808/1151713520283553873/ads.gif)
+Add this for movement
