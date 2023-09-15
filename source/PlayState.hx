@@ -7,6 +7,7 @@ import flixel.input.mouse.FlxMouseButton;
 import flixel.util.FlxTimer;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
+import flixel.system.FlxSound;
 
 
 class PlayState extends FlxState
@@ -20,6 +21,8 @@ class PlayState extends FlxState
 	private var _shadowPlayer2:FlxSprite;
 	private var weapon:FlxSprite;
 	var startAttackAngle:Float;
+	private var attackingSound:FlxSound;
+	var attackSound:Bool = false;
 
 	var isAttacking:Bool = false;
 	var attackSpeed:Float = 760;
@@ -83,6 +86,27 @@ class PlayState extends FlxState
 		if (FlxG.mouse.justPressed && !isAttacking)
 		{
 			isAttacking = true;
+
+			if(!attackSound)
+			{
+				var soundOptions:Array<String> = [
+					"assets/sounds/swing1.ogg",
+					"assets/sounds/swing2.ogg",
+					"assets/sounds/swing3.ogg",
+					"assets/sounds/swing4.ogg",
+					"assets/sounds/swing5.ogg",
+					"assets/sounds/swing6.ogg",
+					"assets/sounds/swing7.ogg",
+					"assets/sounds/swing8.ogg"
+				];
+				
+				var randomSound:String = soundOptions[Std.random(soundOptions.length)];
+				
+				attackingSound = FlxG.sound.load(randomSound);
+				attackingSound.looped = true;  // Make the sound loop continuously
+				attackingSound.play();
+				attackSound = true;
+			}
 			
 			// Store the current angle as the starting angle for the attack
 			//var startAttackAngle:Float = weapon.angle;
@@ -102,6 +126,14 @@ class PlayState extends FlxState
 			{
 				isAttacking = false;
 			});
+		}
+		else
+		{
+			if(attackSound)
+			{
+				attackingSound.stop();  // Stop the walking sound
+				attackSound = false;   // Reset the flag
+			}
 		}
 	}	
 	

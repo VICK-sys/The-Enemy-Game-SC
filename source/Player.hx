@@ -20,6 +20,7 @@ class Player extends FlxSprite
 	var intialSpeed:Float = 50;
 	var velocityTween:VarTween;
 	private var walkingSound:FlxSound;
+	var walkSound:Bool = false;
 
 
 	/**
@@ -84,8 +85,21 @@ class Player extends FlxSprite
 		{
 			var newAngle:Float = 0;
 
-			walkingSound = FlxG.sound.load("assets/sounds/walk1.ogg");
-			walkingSound.play();
+			if(!walkSound)
+			{
+				var soundOptions:Array<String> = [
+					"assets/sounds/walk1.ogg",
+					"assets/sounds/walk2.ogg",
+					"assets/sounds/walk3.ogg"
+				];
+				
+				var randomSound:String = soundOptions[Std.random(soundOptions.length)];
+				
+				walkingSound = FlxG.sound.load(randomSound);
+				walkingSound.looped = true;  // Make the sound loop continuously
+				walkingSound.play();
+				walkSound = true;
+			}
 
 			if(intialSpeed < MOVEMENT_SPEED)
 			{
@@ -145,6 +159,12 @@ class Player extends FlxSprite
 			// If not moving, revert back to the idle animation.
 			this.animation.play("idle");
 			//Actuate.tween(this, 2, {MOVEMENT_SPEED: 0}).ease(Quad.easeOut);
+
+			if(walkSound)
+			{
+				walkingSound.stop();  // Stop the walking sound
+				walkSound = false;   // Reset the flag
+			}
 
 			intialSpeed = 100;
 		}
