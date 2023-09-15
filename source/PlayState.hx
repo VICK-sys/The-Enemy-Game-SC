@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.input.mouse.FlxMouseButton;
 import flixel.util.FlxTimer;
+import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.system.FlxSound;
@@ -20,9 +21,12 @@ class PlayState extends FlxState
 	private var _shadowPlayer:FlxSprite;
 	private var _shadowPlayer2:FlxSprite;
 	private var weapon:FlxSprite;
-	var startAttackAngle:Float;
+	private var weaponAttackAnim:FlxSprite;
+
+
+	private var startAttackAngle:Float;
 	private var attackingSound:FlxSound;
-	var attackSound:Bool = false;
+	private var attackSound:Bool = false;
 
 	var isAttacking:Bool = false;
 	var attackSpeed:Float = 760;
@@ -53,11 +57,20 @@ class PlayState extends FlxState
 		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/mufu_scythe.png");  // Initializing weapon above the player for this example
 		weapon.scale.set(4, 4);
 
+		weaponAttackAnim = new FlxSprite(0, 0, "assets/images/attacks_gfx.png");
+		weaponAttackAnim.frames = FlxAtlasFrames.fromSparrow("assets/images/attacks_gfx.png", "assets/images/attacks_gfx.xml");
+		weaponAttackAnim.animation.addByPrefix("swordAttack", "Sword", 12, false);
+		weaponAttackAnim.animation.addByPrefix("speakAttack", "Spear", 12, false);
+		weaponAttackAnim.antialiasing = false;
+		weaponAttackAnim.visible = false;
+		weaponAttackAnim.scale.set(4, 4);
+
 		add(_shadowPlayer2);
 		add(_follower);
 		add(_shadowPlayer);
 		add(_player);
 		add(weapon);
+		add(weaponAttackAnim);
 
 		weapon.origin.set(weapon.width * 0.5, weapon.height);
 
@@ -76,6 +89,9 @@ class PlayState extends FlxState
 		_shadowPlayer2.x = _follower.x + 10;
 		_shadowPlayer2.y = _follower.y + 72;
 
+		weaponAttackAnim.x = weapon.x + 25;
+		weaponAttackAnim.y = weapon.y + 25;
+
 		// Update weapon position based on mouse and player
 		if(!isAttacking)
 		{
@@ -86,6 +102,9 @@ class PlayState extends FlxState
 		if (FlxG.mouse.justPressed && !isAttacking)
 		{
 			isAttacking = true;
+
+			weaponAttackAnim.visible = true;
+			weaponAttackAnim.animation.play("swordAttack", false);
 
 			if(!attackSound)
 			{
@@ -122,8 +141,9 @@ class PlayState extends FlxState
 				weapon.flipX = true;
 			}
 
-			new FlxTimer().start(0.15, function(tmr:FlxTimer)
+			new FlxTimer().start(0.3, function(tmr:FlxTimer)
 			{
+				weaponAttackAnim.visible = false;
 				isAttacking = false;
 			});
 		}
@@ -131,8 +151,11 @@ class PlayState extends FlxState
 		{
 			if(attackSound)
 			{
-				attackingSound.stop();  // Stop the walking sound
-				attackSound = false;   // Reset the flag
+				new FlxTimer().start(0.1, function(tmr:FlxTimer)
+				{
+					attackingSound.stop();  // Stop the walking sound
+					attackSound = false;   // Reset the flag
+				});
 			}
 		}
 	}	
