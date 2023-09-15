@@ -3,6 +3,7 @@ package;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.util.FlxTimer;
 
 class Follower extends FlxSprite
 {
@@ -57,20 +58,23 @@ class Follower extends FlxSprite
 		}
 		else
 		{
-			// Normalize the direction to get a unit vector
-			var length:Float = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
-			// Only normalize if the length is not zero (to avoid dividing by zero)
-			if (length != 0)
+			new FlxTimer().start(0.1, function(tmr:FlxTimer)
 			{
-				dir.x /= length;
-				dir.y /= length;
-			}
-	
-			// Set the velocity based on direction and speed
-			velocity.set(dir.x * SPEED, dir.y * SPEED);
-	
-			// Play walk animation
-			this.animation.play("walk");
+				// Normalize the direction to get a unit vector
+				var length:Float = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
+				// Only normalize if the length is not zero (to avoid dividing by zero)
+				if (length != 0)
+				{
+					dir.x /= length;
+					dir.y /= length;
+				}
+		
+				// Set the velocity based on direction and speed
+				velocity.set(dir.x * SPEED, dir.y * SPEED);
+		
+				// Play walk animation
+				this.animation.play("walk");
+			});
 		}
 	}	
 }

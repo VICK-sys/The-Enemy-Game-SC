@@ -66,13 +66,15 @@ class PlayState extends FlxState
 		weaponAttackAnim.scale.set(4, 4);
 
 		add(_shadowPlayer2);
-		add(_follower);
 		add(_shadowPlayer);
+		add(_follower);
 		add(_player);
 		add(weapon);
 		add(weaponAttackAnim);
 
 		weapon.origin.set(weapon.width * 0.5, weapon.height);
+
+		//FlxG.sound.playMusic("assets/music/fuck.ogg", 1, true);
 
 		super.create();
 	}
