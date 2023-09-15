@@ -9,6 +9,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.system.FlxSound;
+import flixel.tile.FlxTilemap;
 
 
 class PlayState extends FlxState
@@ -23,6 +24,8 @@ class PlayState extends FlxState
 	private var weapon:FlxSprite;
 	private var weaponAttackAnim:FlxSprite;
 
+	static inline var TILE_WIDTH:Int = 16;
+	static inline var TILE_HEIGHT:Int = 16;
 
 	private var startAttackAngle:Float;
 	private var attackingSound:FlxSound;
@@ -32,6 +35,7 @@ class PlayState extends FlxState
 	var attackSpeed:Float = 760;
 	var attackAngle:Float = 180;  // This is the angle by which you want to rotate the weapon when attacking
 
+	var _collisionMap:FlxTilemap;
 
 	override public function create()
 	{
@@ -39,26 +43,32 @@ class PlayState extends FlxState
 		// (50, 50) on the screen.
 		FlxG.camera.bgColor = 0xFFFFFFFF;
 
-		_background = new FlxSprite(0, 0, "assets/images/image.png");
+		_collisionMap = new FlxTilemap();
+
+		_background = new FlxSprite(0, 0, "assets/images/stages/theEnemy.png");
 		add(_background); // Make sure to add this first, so it's rendered behind everything else
+
+		_collisionMap.loadMapFromCSV("assets/default_auto.txt", "assets/auto_tiles.png", TILE_WIDTH, TILE_HEIGHT, AUTO);
+		_collisionMap.scale.set(4, 4);
+		add(_collisionMap);
 
 		_player = new Player(50, 50);
 		// Add the player to the scene.
 
-		_shadowPlayer = new FlxSprite(_player.x + 10, _player.y + 48, "assets/images/shadow.png");
+		_shadowPlayer = new FlxSprite(_player.x + 10, _player.y + 48, "assets/images/effects/shadow.png");
 		_shadowPlayer.scale.set(4, 4);
 
 		_follower = new Follower(100, 100);  // Starting position of follower
 		_follower.target = _player;          // Set the player as the target to follow
 
-		_shadowPlayer2 = new FlxSprite(_follower.x + 10, _follower.y + 48, "assets/images/shadow.png");
+		_shadowPlayer2 = new FlxSprite(_follower.x + 10, _follower.y + 48, "assets/images/effects/shadow.png");
 		_shadowPlayer2.scale.set(4, 4);
 
-		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/mufu_scythe.png");  // Initializing weapon above the player for this example
+		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/items/mufu_scythe.png");  // Initializing weapon above the player for this example
 		weapon.scale.set(4, 4);
 
-		weaponAttackAnim = new FlxSprite(0, 0, "assets/images/attacks_gfx.png");
-		weaponAttackAnim.frames = FlxAtlasFrames.fromSparrow("assets/images/attacks_gfx.png", "assets/images/attacks_gfx.xml");
+		weaponAttackAnim = new FlxSprite(0, 0, "assets/images/effects/attacks_gfx.png");
+		weaponAttackAnim.frames = FlxAtlasFrames.fromSparrow("assets/images/effects/attacks_gfx.png", "assets/images/effects/attacks_gfx.xml");
 		weaponAttackAnim.animation.addByPrefix("swordAttack", "Sword", 12, false);
 		weaponAttackAnim.animation.addByPrefix("speakAttack", "Spear", 12, false);
 		weaponAttackAnim.antialiasing = false;
@@ -74,7 +84,7 @@ class PlayState extends FlxState
 
 		weapon.origin.set(weapon.width * 0.5, weapon.height);
 
-		//FlxG.sound.playMusic("assets/music/fuck.ogg", 1, true);
+		FlxG.sound.playMusic("assets/music/stage/gloomDoomWoods.ogg", 0.3, true);
 
 		super.create();
 	}
@@ -111,14 +121,14 @@ class PlayState extends FlxState
 			if(!attackSound)
 			{
 				var soundOptions:Array<String> = [
-					"assets/sounds/swing1.ogg",
-					"assets/sounds/swing2.ogg",
-					"assets/sounds/swing3.ogg",
-					"assets/sounds/swing4.ogg",
-					"assets/sounds/swing5.ogg",
-					"assets/sounds/swing6.ogg",
-					"assets/sounds/swing7.ogg",
-					"assets/sounds/swing8.ogg"
+					"assets/sounds/swing/swing1.ogg",
+					"assets/sounds/swing/swing2.ogg",
+					"assets/sounds/swing/swing3.ogg",
+					"assets/sounds/swing/swing4.ogg",
+					"assets/sounds/swing/swing5.ogg",
+					"assets/sounds/swing/swing6.ogg",
+					"assets/sounds/swing/swing7.ogg",
+					"assets/sounds/swing/swing8.ogg"
 				];
 				
 				var randomSound:String = soundOptions[Std.random(soundOptions.length)];
@@ -155,7 +165,7 @@ class PlayState extends FlxState
 			{
 				new FlxTimer().start(0.1, function(tmr:FlxTimer)
 				{
-					attackingSound.stop();  // Stop the walking sound
+					attackingSound.stop();  // Stop the attacking sound
 					attackSound = false;   // Reset the flag
 				});
 			}

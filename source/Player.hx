@@ -34,8 +34,8 @@ class Player extends FlxSprite
 	{
 		super(x, y);
 
-		this.loadGraphic("assets/images/mufu.png", true, 20, 23);
-		this.frames = FlxAtlasFrames.fromSparrow("assets/images/mufu.png", "assets/images/mufu.xml");
+		this.loadGraphic("assets/images/characters/mufu.png", true, 20, 23);
+		this.frames = FlxAtlasFrames.fromSparrow("assets/images/characters/mufu.png", "assets/images/characters/mufu.xml");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
 		this.animation.addByPrefix("walk", "Run", 12, true);
 		this.animation.addByPrefix("hurt", "Hurt", 12, true);
@@ -88,9 +88,9 @@ class Player extends FlxSprite
 			if(!walkSound)
 			{
 				var soundOptions:Array<String> = [
-					"assets/sounds/walk1.ogg",
-					"assets/sounds/walk2.ogg",
-					"assets/sounds/walk3.ogg"
+					"assets/sounds/walk/walk1.ogg",
+					"assets/sounds/walk/walk2.ogg",
+					"assets/sounds/walk/walk3.ogg"
 				];
 				
 				var randomSound:String = soundOptions[Std.random(soundOptions.length)];

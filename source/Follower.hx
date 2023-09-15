@@ -16,8 +16,8 @@ class Follower extends FlxSprite
     {
         super(x, y);
         // Load a graphic for the Follower (change this to your AI's image)
-		this.loadGraphic("assets/images/enemy.png", true, 20, 23);
-		this.frames = FlxAtlasFrames.fromSparrow("assets/images/enemy.png", "assets/images/mufu.xml");
+		this.loadGraphic("assets/images/characters/enemy.png", true, 20, 23);
+		this.frames = FlxAtlasFrames.fromSparrow("assets/images/characters/enemy.png", "assets/images/characters/mufu.xml");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
 		this.animation.addByPrefix("walk", "Run", 12, true);
 		this.animation.addByPrefix("hurt", "Hurt", 12, true);
