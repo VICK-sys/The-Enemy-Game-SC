@@ -30,10 +30,14 @@ class PlayState extends FlxState
 	private var weaponAttackAnim:FlxSprite;
 	private var barBackground:FlxSprite;
 	private var playerIcon:FlxSprite;
+	private var redObject:FlxSprite;
 
 	private var enemyDamaged:Bool;
 	private var attackSound:Bool = false;
 	var isAttacking:Bool = false;
+	
+	private var dead:Bool;
+
 
 	static inline var TILE_WIDTH:Int = 16;
 	static inline var TILE_HEIGHT:Int = 16;
@@ -56,6 +60,8 @@ class PlayState extends FlxState
 		// (50, 50) on the screen.
 		FlxG.camera.bgColor = 0xFFFFFFFF;
 
+		FlxG.debugger.drawDebug = true;
+
 		camUI = new FlxCamera();
 		FlxG.cameras.add(camUI, false);
 		camUI.bgColor.alpha = 0;
@@ -69,7 +75,7 @@ class PlayState extends FlxState
 		_collisionMap.scale.set(4, 4);
 		add(_collisionMap);
 
-		_player = new Player(50, 50);
+		_player = new Player(350, 350);
 		// Add the player to the scene.
 
 		_shadowPlayer = new FlxSprite(_player.x + 10, _player.y + 48, "assets/images/effects/shadow.png");
@@ -93,15 +99,21 @@ class PlayState extends FlxState
 		weaponAttackAnim.visible = false;
 		weaponAttackAnim.scale.set(4, 4);
 
+		redObject = new FlxSprite(300, 300, "assets/images/characters/red.png");
+		redObject.scale.set(4, 4);
+
 		add(_shadowPlayer2);
 		add(_shadowPlayer);
 		add(_follower);
 		add(_player);
 		add(weapon);
 
+
+		add(redObject);
+
 		weapon.origin.set(weapon.width * 0.5, weapon.height);
 
-		weaponAttackAnim.origin.set(weapon.width * 0.5, weapon.height);
+		//weaponAttackAnim.origin.set(weapon.width / 2, weapon.height / 2);
 
 		barBackground = new FlxSprite(160, 670, "assets/images/ui/bar_red.png");
 		barBackground.antialiasing = false;
@@ -109,7 +121,7 @@ class PlayState extends FlxState
 		barBackground.cameras = [camUI];
 
 		bar = new FlxBar(barBackground.x, barBackground.y, LEFT_TO_RIGHT, Std.int(barBackground.width), Std.int(barBackground.height), this, 'health', 0, 2);
-		bar.createImageBar("assets/images/ui/bar_empty.png", "assets/images/ui/bar_red.png", FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
+		bar.createImageBar("assets/images/ui/bar_main_empty.png", "assets/images/ui/bar_red.png", FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
 		bar.updateBar();
 		bar.antialiasing = false;
 		bar.scale.set(4, 4);
@@ -130,23 +142,34 @@ class PlayState extends FlxState
 	}
 
 	override public function update(elapsed:Float):Void 
-	{
+	{	
 		super.update(elapsed);
+
+		// Check for collision between _player and _follower
+		//FlxG.overlap(_player, _follower, onPlayerFollowerOverlap);
 
 		updateWeaponPositionXY(_player, weapon);
 
-		_shadowPlayer.x = _player.x + 10;
-		_shadowPlayer.y = _player.y + 72;
+		weaponAttackAnim.updateHitbox();
+		redObject.updateHitbox();
+		_player.updateHitbox();
+		_follower.updateHitbox();
+
+		_shadowPlayer.x = _player.x + 57;
+		_shadowPlayer.y = _player.y + 122;
+
+		//weaponAttackAnim.origin.x = weapon.origin.x + 20;
+		//weaponAttackAnim.origin.y = weapon.origin.y - 30;
 
 		if(_follower.flipX == true)
 		{
-			_shadowPlayer2.x = _follower.x + 8;
+			_shadowPlayer2.x = _follower.x + 52;
 		}
 		else
 		{
-			_shadowPlayer2.x = _follower.x + 15;
+			_shadowPlayer2.x = _follower.x + 62;
 		}
-		_shadowPlayer2.y = _follower.y + 72;
+		_shadowPlayer2.y = _follower.y + 122;
 
 		orderEntitiesByY();
 
@@ -164,25 +187,26 @@ class PlayState extends FlxState
 				enemyDamaged = false;
 			});
 		}*/
-	
+
+		if (FlxG.overlap(redObject, _player)) {
+			health -= 0.025;
+		}	
 
 		// Update weapon position based on mouse and player
 		if(!isAttacking)
 		{
 			updateWeaponPosition(FlxG.mouse.screenX, FlxG.mouse.screenY, _player, weapon);
-			weaponAttackAnim.x = weapon.x + 75;
+			weaponAttackAnim.x = weapon.x + 50;
 			weaponAttackAnim.y = weapon.y + 25;
-			weaponAttackAnim.angle = weapon.angle;
 		}
 	
 		// Check for a single mouse click to start the attack
-		if (FlxG.mouse.justPressed && !isAttacking)
+		if (FlxG.mouse.justPressed && !isAttacking && !dead)
 		{
 			isAttacking = true;
 
 			// Parameters: Intensity of the shake (0 to 1), Duration of the shake in seconds
 			//FlxG.camera.shake(0.005, 0.5);
-
 
 			add(weaponAttackAnim);
 
@@ -245,6 +269,15 @@ class PlayState extends FlxState
 				});
 			}
 		}
+
+		if(health <= 0)
+			{
+				health = 0;
+				_player.animation.play("death");//The Animation is not playing in full for whatever reason
+				remove(_shadowPlayer);
+				remove(weapon);
+				dead = true;
+			}
 	}	
 
 	function orderEntitiesByY():Void {
@@ -272,18 +305,34 @@ class PlayState extends FlxState
 	
 		// Set the weapon's rotation angle
 		weapon.angle = theta * (180 / Math.PI);  // Convert the angle from radians to degrees
+
+		weaponAttackAnim.angle = weapon.angle;
 	
 		// Position the weapon
 		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
-		weapon.x = _player.x + distanceFromPlayer * Math.cos(theta) - weapon.origin.x + 17;
-		weapon.y = _player.y + distanceFromPlayer * Math.sin(theta) - weapon.origin.y + 45;
+		weapon.x = _player.x + distanceFromPlayer * Math.cos(theta) - weapon.origin.x + 67;
+		weapon.y = _player.y + distanceFromPlayer * Math.sin(theta) - weapon.origin.y + 105;
 	}
 
 	function updateWeaponPositionXY(_player:Player, weapon:FlxSprite):Void 
 	{ 
 		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
-		weapon.x = _player.x + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.x + 17;
-		weapon.y = _player.y + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.y + 45;
+		weapon.x = _player.x + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.x + 67;
+		weapon.y = _player.y + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.y + 105;
 	}
+
+	function onPlayerFollowerOverlap(_player:Player, _follower:Follower):Void 
+	{
+		// Handle the collision here. For example, you can stop the follower or make the player take damage.
+		// This is just an example, you can customize the behavior as needed.
+		trace("Overlap detected!");
+		_follower.velocity.x = 0;
+		_follower.velocity.y = 0;
+		_player.velocity.x = 0;
+		_player.velocity.y = 0;
+	
+		// If you want the player to take damage or any other action, add that logic here.
+	}
+		
 		
 }
