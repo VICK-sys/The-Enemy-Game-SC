@@ -39,7 +39,7 @@ class Player extends FlxSprite
 		this.animation.addByPrefix("idle", "Idle", 12, true);
 		this.animation.addByPrefix("walk", "Run", 12, true);
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
-		this.animation.addByPrefix("death", "Death", 12, true);
+		this.animation.addByPrefix("death", "Death", 12, false);
 		this.antialiasing = false;
 		this.scale.set(4, 4);
 

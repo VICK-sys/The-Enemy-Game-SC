@@ -54,6 +54,8 @@ class PlayState extends FlxState
 
 	public var camUI:FlxCamera;
 
+	private var customCursor:FlxSprite;
+
 	override public function create()
 	{
 		// Create a new instance of the player at the point
@@ -136,6 +138,16 @@ class PlayState extends FlxState
 
 		add(playerIcon);
 
+		// Load the custom cursor graphic
+		customCursor = new FlxSprite(0, 0, "assets/images/ui/mouse.png");
+		customCursor.cameras = [camUI];
+
+		// Scale the cursor to make it larger (e.g., 2 times its original size)
+		customCursor.scale.set(4, 4);
+
+		// Add the custom cursor to the state
+		add(customCursor);
+
 		FlxG.sound.playMusic("assets/music/stage/gloomDoomWoods.ogg", 0.3, true);
 
 		super.create();
@@ -147,6 +159,10 @@ class PlayState extends FlxState
 
 		// Check for collision between _player and _follower
 		//FlxG.overlap(_player, _follower, onPlayerFollowerOverlap);
+
+		FlxG.mouse.visible = false;
+
+		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
 
 		updateWeaponPositionXY(_player, weapon);
 
@@ -196,8 +212,8 @@ class PlayState extends FlxState
 		if(!isAttacking)
 		{
 			updateWeaponPosition(FlxG.mouse.screenX, FlxG.mouse.screenY, _player, weapon);
-			weaponAttackAnim.x = weapon.x + 50;
-			weaponAttackAnim.y = weapon.y + 25;
+			weaponAttackAnim.x = _player.x - 75;
+			weaponAttackAnim.y = _player.y - 50;
 		}
 	
 		// Check for a single mouse click to start the attack
