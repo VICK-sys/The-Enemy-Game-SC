@@ -4,6 +4,7 @@ import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxTimer;
+import flixel.FlxG;
 
 class Follower extends FlxSprite
 {
@@ -11,7 +12,6 @@ class Follower extends FlxSprite
     public var target:Player;
 	static inline var STOP_THRESHOLD:Float = 70;
 	
-
     public function new(x:Float=0, y:Float=0)
     {
         super(x, y);
@@ -35,7 +35,7 @@ class Follower extends FlxSprite
 		var targetMid:FlxPoint = target.getMidpoint();
 		var followerMid:FlxPoint = this.getMidpoint();
 		var dir:FlxPoint = new FlxPoint(targetMid.x - followerMid.x, targetMid.y - followerMid.y);
-	
+
 		// Check the direction and set flipX accordingly
 		if (dir.x > 0)
 		{
