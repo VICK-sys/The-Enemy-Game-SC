@@ -10,8 +10,9 @@ class Woodster extends FlxSprite
 {
     static inline var SPEED:Float = 125;
     public var target:Player;
-	static inline var STOP_THRESHOLD:Float = 400;
-	
+	static inline var STOP_THRESHOLD:Float = 400;	
+	private var stopAttacking:Bool;
+
     public function new(x:Float=0, y:Float=0)
     {
         super(x, y);
@@ -20,9 +21,9 @@ class Woodster extends FlxSprite
 		this.frames = FlxAtlasFrames.fromSparrow("assets/images/enemies/woodster.png", "assets/images/enemies/woodster.xml");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
 		this.animation.addByPrefix("walk", "Walk", 12, true);
-		this.animation.addByPrefix("sstart", "Shoot start", 12, true);
-		this.animation.addByPrefix("sloop", "Shoot loop", 12, true);
-		this.animation.addByPrefix("send", "Shoot end", 12, true);
+		this.animation.addByPrefix("sstart", "Shoot start", 12, false);
+		this.animation.addByPrefix("sloop", "Shoot loop", 12, false);
+		this.animation.addByPrefix("send", "Shoot end", 12, false);
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
 		this.animation.addByPrefix("death", "Death.", 12, false);
 		this.antialiasing = false;
@@ -53,15 +54,23 @@ class Woodster extends FlxSprite
 		var distance:Float = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
 	
 		// Check if the distance is less than the threshold
-		if (distance <= STOP_THRESHOLD)
+		if (distance < STOP_THRESHOLD)
 		{
-			// Stop the Follower
+			//attack();
 			velocity.set(0, 0);
-			this.animation.play("idle");
+			if(!stopAttacking)
+			{
+				new FlxTimer().start(0.5, function(tmr:FlxTimer)
+				{
+					attack();
+				});
+			}
+			stopAttacking = false;
 		}
 		else
 		{
-			new FlxTimer().start(0.1, function(tmr:FlxTimer)
+			stopAttacking = true;
+			new FlxTimer().start(0.5, function(tmr:FlxTimer)
 			{
 				// Normalize the direction to get a unit vector
 				var length:Float = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
@@ -80,4 +89,27 @@ class Woodster extends FlxSprite
 			});
 		}
 	}	
+	
+	private function attack():Void
+	{
+		this.animation.play("sstart");
+		var sstartDuration:Float = this.animation.getByName("sstart").frames.length;
+		new FlxTimer().start(0.2, function(tmr:FlxTimer)
+		{
+			this.animation.play("sloop");
+			var sloopDuration:Float = this.animation.getByName("sloop").frames.length;
+			new FlxTimer().start(0.2, function(tmr:FlxTimer)
+			{
+				this.animation.play("send");
+				var sendDuration:Float = this.animation.getByName("send").frames.length;
+				new FlxTimer().start(0.2, function(tmr:FlxTimer)
+				{
+					if(!stopAttacking)
+					{
+						this.attack();  // Call attack again to loop the sequence
+					}
+				});
+			});
+		});
+	}		
 }

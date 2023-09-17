@@ -14,6 +14,7 @@ class TitleSequence extends FlxState
 {
     var modLogo:FlxSprite;
     var modLogoAnimated:FlxSprite;
+    var canSkip:Bool = false;
     override public function create() 
     {
         FlxG.mouse.visible = false;
@@ -43,6 +44,7 @@ class TitleSequence extends FlxState
                 //add(modLogo);
                 modLogoAnimated.visible = true;
                 modLogoAnimated.animation.play("idle", false);
+                canSkip = true;
             });
 
             new FlxTimer().start(3, function(timer:FlxTimer) {
@@ -58,7 +60,7 @@ class TitleSequence extends FlxState
     override public function update(elapsed:Float):Void 
     {
         super.update(elapsed);
-        if (FlxG.keys.justPressed.ENTER && !skipped) {
+        if (FlxG.keys.justPressed.ENTER && !skipped && canSkip) {
             skipped = true;
             FlxTween.tween(modLogoAnimated, {alpha: 0}, 1, {
                 ease:FlxEase.expoIn,

@@ -42,9 +42,13 @@ class PlayState extends FlxState
 	private var attackSound:Bool = false;
 	var isAttacking:Bool = false;
 	
-	private var dead:Bool;
+	public static var dead:Bool;
 
 	private var iframes:Bool = false;
+
+    var enemyTimer:Float = 0;
+    var woodsterTimer:Float = 0;
+    var likWidTimer:Float = 0;
 
 	static inline var TILE_WIDTH:Int = 16;
 	static inline var TILE_HEIGHT:Int = 16;
@@ -52,6 +56,9 @@ class PlayState extends FlxState
 	public var health:Float = 2;
 	var attackSpeed:Float = 760;
 	var attackAngle:Float = 180;  // This is the angle by which you want to rotate the weapon when attacking
+
+	    // Constants for the max time an entity will move in one direction
+    static inline var MAX_TIME:Float = 2.0; // 2 seconds, for example
 
 	private var attackingSound:FlxSound;
 
@@ -93,13 +100,10 @@ class PlayState extends FlxState
 		_shadowPlayer.scale.set(4, 4);
 
 		enemy = new Enemy(100, 100);  // Starting position of follower
-		enemy.target = _player;          // Set the player as the target to follow
 
 		woodster = new Woodster(100, 100);
-		woodster.target = _player;
 
 		likWid = new LikWid(100, 100);
-		likWid.target = _player;
 
 		_shadowPlayer2 = new FlxSprite(enemy.x + 10, enemy.y + 48, "assets/images/effects/shadow.png");
 		_shadowPlayer2.scale.set(4, 4);
@@ -182,6 +186,34 @@ class PlayState extends FlxState
 	{	
 		super.update(elapsed);
 
+        enemyTimer -= elapsed;
+        woodsterTimer -= elapsed;
+        likWidTimer -= elapsed;
+
+		if(!dead)
+		{
+			enemy.target = _player;          // Set the player as the target to follow
+			woodster.target = _player;
+			likWid.target = _player;
+		}
+		else
+		{
+			if (enemyTimer <= 0) {
+				setRandomVelocity(enemy);
+				enemyTimer = Math.random() * MAX_TIME;
+			}
+	
+			if (woodsterTimer <= 0) {
+				setRandomVelocity(woodster);
+				woodsterTimer = Math.random() * MAX_TIME;
+			}
+	
+			if (likWidTimer <= 0) {
+				setRandomVelocity(likWid);
+				likWidTimer = Math.random() * MAX_TIME;
+			}
+		}
+
 		// Check for collision between _player and enemy
 		//FlxG.overlap(_player, enemy, onPlayerFollowerOverlap);
 
@@ -247,7 +279,7 @@ class PlayState extends FlxState
 		orderEntitiesByY();
 
 		//Not working properly, gonna leave it commented out
-		/*if (FlxG.overlap(weaponAttackAnim, enemy)) {
+		if (FlxG.overlap(weaponAttackAnim, enemy)) {
 			enemyDamaged = true;
 		}	
 		
@@ -259,7 +291,7 @@ class PlayState extends FlxState
 			{	
 				enemyDamaged = false;
 			});
-		}*/
+		}
 
 
 		if (FlxG.overlap(redObject, _player)) 
@@ -398,7 +430,6 @@ class PlayState extends FlxState
 		}
 	}
 	
-	
 	function updateWeaponPosition(mouseX:Float, mouseY:Float, _player:Player, weapon:FlxSprite):Void 
 	{
 		// Calculate the angle   
@@ -444,6 +475,11 @@ class PlayState extends FlxState
     function decreaseVolume():Void {
         FlxG.sound.changeVolume(-0.1);
     }	
+
+    function setRandomVelocity(entity:FlxSprite):Void {
+        entity.velocity.x = Math.random() * 200 - 100;
+        entity.velocity.y = Math.random() * 200 - 100;
+    }
 
 	private function createFollower():Void
 	{
