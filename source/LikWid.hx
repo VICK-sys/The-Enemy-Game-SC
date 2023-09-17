@@ -6,25 +6,22 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxTimer;
 import flixel.FlxG;
 
-class Enemies extends FlxSprite
+class LikWid extends FlxSprite
 {
-    static inline var SPEED:Float = 125;
+    static inline var SPEED:Float = 225;
     public var target:Player;
-	static inline var STOP_THRESHOLD:Float = 400;
+	static inline var STOP_THRESHOLD:Float = 200;
 	
     public function new(x:Float=0, y:Float=0)
     {
         super(x, y);
         // Load a graphic for the Enemies (change this to your AI's image)
-		this.loadGraphic("assets/images/enemies/woodster.png", true, 20, 23);
-		this.frames = FlxAtlasFrames.fromSparrow("assets/images/enemies/woodster.png", "assets/images/enemies/woodster.xml");
+		this.loadGraphic("assets/images/enemies/likwid.png", true, 20, 23);
+		this.frames = FlxAtlasFrames.fromSparrow("assets/images/enemies/likwid.png", "assets/images/enemies/likwid.xml");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
 		this.animation.addByPrefix("walk", "Walk", 12, true);
-		this.animation.addByPrefix("sstart", "Shoot start", 12, true);
-		this.animation.addByPrefix("sloop", "Shoot loop", 12, true);
-		this.animation.addByPrefix("send", "Shoot end", 12, true);
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
-		this.animation.addByPrefix("death", "Death.", 12, false);
+		this.animation.addByPrefix("death", "Death", 12, false);
 		this.antialiasing = false;
 		this.scale.set(4, 4);
     }

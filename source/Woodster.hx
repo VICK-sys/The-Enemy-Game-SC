@@ -6,22 +6,25 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxTimer;
 import flixel.FlxG;
 
-class Follower extends FlxSprite
+class Woodster extends FlxSprite
 {
-    static inline var SPEED:Float = 300;
+    static inline var SPEED:Float = 125;
     public var target:Player;
-	static inline var STOP_THRESHOLD:Float = 70;
+	static inline var STOP_THRESHOLD:Float = 400;
 	
     public function new(x:Float=0, y:Float=0)
     {
         super(x, y);
-        // Load a graphic for the Follower (change this to your AI's image)
-		this.loadGraphic("assets/images/enemies/enemy.png", true, 20, 23);
-		this.frames = FlxAtlasFrames.fromSparrow("assets/images/enemies/enemy.png", "assets/images/enemies/enemy.xml");
+        // Load a graphic for the Enemies (change this to your AI's image)
+		this.loadGraphic("assets/images/enemies/woodster.png", true, 20, 23);
+		this.frames = FlxAtlasFrames.fromSparrow("assets/images/enemies/woodster.png", "assets/images/enemies/woodster.xml");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
-		this.animation.addByPrefix("walk", "Run", 12, true);
+		this.animation.addByPrefix("walk", "Walk", 12, true);
+		this.animation.addByPrefix("sstart", "Shoot start", 12, true);
+		this.animation.addByPrefix("sloop", "Shoot loop", 12, true);
+		this.animation.addByPrefix("send", "Shoot end", 12, true);
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
-		this.animation.addByPrefix("death", "Death", 12, false);
+		this.animation.addByPrefix("death", "Death.", 12, false);
 		this.antialiasing = false;
 		this.scale.set(4, 4);
     }

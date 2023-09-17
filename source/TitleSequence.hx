@@ -14,7 +14,6 @@ class TitleSequence extends FlxState
 {
     var modLogo:FlxSprite;
     var modLogoAnimated:FlxSprite;
-
     override public function create() 
     {
         FlxG.mouse.visible = false;
@@ -53,6 +52,19 @@ class TitleSequence extends FlxState
                 });
             });
         });
+    }
+
+    var skipped:Bool = false;
+    override public function update(elapsed:Float):Void 
+    {
+        super.update(elapsed);
+        if (FlxG.keys.justPressed.ENTER && !skipped) {
+            skipped = true;
+            FlxTween.tween(modLogoAnimated, {alpha: 0}, 1, {
+                ease:FlxEase.expoIn,
+                onComplete: die
+            });
+        }
     }
 
     function die(tween:FlxTween):Void {

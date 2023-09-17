@@ -21,14 +21,17 @@ class PlayState extends FlxState
 	// scene.
 	private var _player:Player;
 
-	private var _follower:Follower;
+	private var enemy:Enemy;
 
-	private var woodster:Enemies;
+	private var woodster:Woodster;
+
+	private var likWid:LikWid;
 
 	private var _background:FlxSprite;
 	private var _shadowPlayer:FlxSprite;
 	private var _shadowPlayer2:FlxSprite;
 	private var _shadowPlayer3:FlxSprite;
+	private var _shadowPlayer4:FlxSprite;
 	private var weapon:FlxSprite;
 	private var weaponAttackAnim:FlxSprite;
 	private var barBackground:FlxSprite;
@@ -89,17 +92,23 @@ class PlayState extends FlxState
 		_shadowPlayer = new FlxSprite(_player.x + 10, _player.y + 48, "assets/images/effects/shadow.png");
 		_shadowPlayer.scale.set(4, 4);
 
-		_follower = new Follower(100, 100);  // Starting position of follower
-		_follower.target = _player;          // Set the player as the target to follow
+		enemy = new Enemy(100, 100);  // Starting position of follower
+		enemy.target = _player;          // Set the player as the target to follow
 
-		woodster = new Enemies(100, 100);
+		woodster = new Woodster(100, 100);
 		woodster.target = _player;
 
-		_shadowPlayer2 = new FlxSprite(_follower.x + 10, _follower.y + 48, "assets/images/effects/shadow.png");
+		likWid = new LikWid(100, 100);
+		likWid.target = _player;
+
+		_shadowPlayer2 = new FlxSprite(enemy.x + 10, enemy.y + 48, "assets/images/effects/shadow.png");
 		_shadowPlayer2.scale.set(4, 4);
 
 		_shadowPlayer3 = new FlxSprite(woodster.x, woodster.y, "assets/images/effects/shadow.png");
-		_shadowPlayer3.scale.set(4, 4);
+		_shadowPlayer3.scale.set(6, 4);
+
+		_shadowPlayer4 = new FlxSprite(likWid.x, likWid.y, "assets/images/effects/shadow.png");
+		_shadowPlayer4.scale.set(7, 4);
 
 		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/items/mufu_scythe.png");  // Initializing weapon above the player for this example
 		weapon.scale.set(4, 4);
@@ -116,11 +125,13 @@ class PlayState extends FlxState
 		redObject = new FlxSprite(300, 300, "assets/images/characters/red.png");
 		redObject.scale.set(4, 4);
 
+		add(_shadowPlayer4);
 		add(_shadowPlayer3);
 		add(_shadowPlayer2);
 		add(_shadowPlayer);
-		add(_follower);
+		add(enemy);
 		add(woodster);
+		add(likWid);
 		add(_player);
 		add(weapon);
 
@@ -171,8 +182,8 @@ class PlayState extends FlxState
 	{	
 		super.update(elapsed);
 
-		// Check for collision between _player and _follower
-		//FlxG.overlap(_player, _follower, onPlayerFollowerOverlap);
+		// Check for collision between _player and enemy
+		//FlxG.overlap(_player, enemy, onPlayerFollowerOverlap);
 
 		if (FlxG.keys.justPressed.ONE)
 		{
@@ -206,8 +217,9 @@ class PlayState extends FlxState
 		weaponAttackAnim.updateHitbox();
 		redObject.updateHitbox();
 		_player.updateHitbox();
-		_follower.updateHitbox();
+		enemy.updateHitbox();
 		woodster.updateHitbox();
+		likWid.updateHitbox();
 
 
 		_shadowPlayer.x = _player.x + 57;
@@ -216,29 +228,32 @@ class PlayState extends FlxState
 		_shadowPlayer3.x = woodster.x + 57;
 		_shadowPlayer3.y = woodster.y + 185;
 
+		_shadowPlayer4.x = likWid.x + 57;
+		_shadowPlayer4.y = likWid.y + 120;
+
 		//weaponAttackAnim.origin.x = weapon.origin.x + 20;
 		//weaponAttackAnim.origin.y = weapon.origin.y - 30;
 
-		if(_follower.flipX == true)
+		if(enemy.flipX == true)
 		{
-			_shadowPlayer2.x = _follower.x + 52;
+			_shadowPlayer2.x = enemy.x + 52;
 		}
 		else
 		{
-			_shadowPlayer2.x = _follower.x + 62;
+			_shadowPlayer2.x = enemy.x + 62;
 		}
-		_shadowPlayer2.y = _follower.y + 122;
+		_shadowPlayer2.y = enemy.y + 122;
 
 		orderEntitiesByY();
 
 		//Not working properly, gonna leave it commented out
-		/*if (FlxG.overlap(weaponAttackAnim, _follower)) {
+		/*if (FlxG.overlap(weaponAttackAnim, enemy)) {
 			enemyDamaged = true;
 		}	
 		
 		if(enemyDamaged == true)
 		{
-			//_follower.animation.play("hurt", false);
+			//enemy.animation.play("hurt", false);
 
 			new FlxTimer().start(0.3, function(tmr:FlxTimer)
 			{	
@@ -364,83 +379,24 @@ class PlayState extends FlxState
 		}
 	}	
 
+	//I'll have to tweak this function since its not working 100%
 	function orderEntitiesByY():Void {
+		remove(_player);
+		remove(enemy);
+		remove(weapon);
+		remove(woodster);
+		remove(likWid);
 	
-		if (_player.y < _follower.y && _follower.y < woodster.y + 705) {
-
-			remove(_player);
-			remove(_follower);
-			remove(weapon);
-			remove(woodster); 
-
-			add(_player);
-			add(weapon);
-			add(_follower);
-			add(woodster);
-		}
-		else if (_player.y < woodster.y + 70 && woodster.y + 70 < _follower.y) {
-						
-			remove(_player);
-			remove(_follower);
-			remove(weapon);
-			remove(woodster); 
-
-			add(_player);
-			add(weapon);
-			add(woodster);
-			add(_follower);
-		}
-		else if (_follower.y < _player.y && _player.y < woodster.y + 70) {
-						
-			remove(_player);
-			remove(_follower);
-			remove(weapon);
-			remove(woodster); 
-
-			add(_follower);
-			add(_player);
-			add(weapon);
-			add(woodster);
-		}
-		else if (_follower.y < woodster.y + 70 && woodster.y + 70 < _player.y) {
-						
-			remove(_player);
-			remove(_follower);
-			remove(weapon);
-			remove(woodster); 
-
-			add(_follower);
-			add(woodster);
-			add(_player);
-			add(weapon);
-		}
-		else if (woodster.y + 70 < _player.y && _player.y < _follower.y) {
-						
-			remove(_player);
-			remove(_follower);
-			remove(weapon);
-			remove(woodster); 
-
-			add(woodster);
-			add(_player);
-			add(weapon);
-			add(_follower);
-		}
-		else if (woodster.y + 70 < _follower.y && _follower.y < _player.y) {
-						
-			remove(_player);
-			remove(_follower);
-			remove(weapon);
-			remove(woodster); 
-
-			add(woodster);
-			add(_follower);
-			add(_player);
-			add(weapon);
+		var entities:Array<Dynamic> = [_player, enemy, woodster, likWid];
+		entities.sort(function(a, b) return a.y - b.y);
+	
+		for(entity in entities) {
+			if(entity == _player) {
+				add(weapon);
+			}
+			add(entity);
 		}
 	}
-	
-	
 	
 	
 	function updateWeaponPosition(mouseX:Float, mouseY:Float, _player:Player, weapon:FlxSprite):Void 
@@ -468,13 +424,13 @@ class PlayState extends FlxState
 		weapon.y = _player.y + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.y + 105;
 	}
 
-	function onPlayerFollowerOverlap(_player:Player, _follower:Follower):Void 
+	function onPlayerFollowerOverlap(_player:Player, enemy:Enemy):Void 
 	{
 		// Handle the collision here. For example, you can stop the follower or make the player take damage.
 		// This is just an example, you can customize the behavior as needed.
 		trace("Overlap detected!");
-		_follower.velocity.x = 0;
-		_follower.velocity.y = 0;
+		enemy.velocity.x = 0;
+		enemy.velocity.y = 0;
 		_player.velocity.x = 0;
 		_player.velocity.y = 0;
 	
@@ -492,8 +448,8 @@ class PlayState extends FlxState
 	private function createFollower():Void
 	{
 		// Instantiate the new follower object
-		var _follower:Follower = new Follower(100, 100);
-		_follower.target = _player;
-		add(_follower);
+		var enemy:Enemy = new Enemy(100, 100);
+		enemy.target = _player;
+		add(enemy);
 	};
 }
