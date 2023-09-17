@@ -41,6 +41,8 @@ class PlayState extends FlxState
 	private var enemyDamaged:Bool;
 	private var attackSound:Bool = false;
 	var isAttacking:Bool = false;
+
+	private var sixNotPressed = true;
 	
 	public static var dead:Bool;
 
@@ -77,8 +79,6 @@ class PlayState extends FlxState
 		FlxG.camera.bgColor = 0xFFFFFFFF;
 
 		Player.blockMovement = false;
-
-		FlxG.debugger.drawDebug = true;
 
 		camUI = new FlxCamera();
 		FlxG.cameras.add(camUI, false);
@@ -232,6 +232,24 @@ class PlayState extends FlxState
 			createFollower();
 		}
 
+		if (FlxG.keys.justPressed.FIVE)
+		{
+			health = 0;
+		}
+
+		if (FlxG.keys.justPressed.SIX)
+		{
+			if (sixNotPressed)
+			{
+				FlxG.debugger.drawDebug = !FlxG.debugger.drawDebug;  // Toggle the drawDebug state
+				sixNotPressed = false;
+			}
+			else
+			{
+				sixNotPressed = true;
+			}
+		}
+		
 		if (FlxG.keys.justPressed.FOUR)
 		{
 			health = 2;
@@ -246,41 +264,36 @@ class PlayState extends FlxState
 
 		updateWeaponPositionXY(_player, weapon);
 
-		weaponAttackAnim.updateHitbox();
 		redObject.updateHitbox();
-		_player.updateHitbox();
-		enemy.updateHitbox();
-		woodster.updateHitbox();
-		likWid.updateHitbox();
 
 
-		_shadowPlayer.x = _player.x + 57;
-		_shadowPlayer.y = _player.y + 122;
+		_shadowPlayer.x = _player.x + 30;
+		_shadowPlayer.y = _player.y + 90;
 
-		_shadowPlayer3.x = woodster.x + 57;
-		_shadowPlayer3.y = woodster.y + 185;
+		_shadowPlayer3.x = woodster.x + 33;
+		_shadowPlayer3.y = woodster.y + 105;
 
-		_shadowPlayer4.x = likWid.x + 57;
-		_shadowPlayer4.y = likWid.y + 120;
+		_shadowPlayer4.x = likWid.x + 33;
+		_shadowPlayer4.y = likWid.y + 73;
 
 		//weaponAttackAnim.origin.x = weapon.origin.x + 20;
 		//weaponAttackAnim.origin.y = weapon.origin.y - 30;
 
 		if(enemy.flipX == true)
 		{
-			_shadowPlayer2.x = enemy.x + 52;
+			_shadowPlayer2.x = enemy.x + 22;
 		}
 		else
 		{
-			_shadowPlayer2.x = enemy.x + 62;
+			_shadowPlayer2.x = enemy.x + 32;
 		}
-		_shadowPlayer2.y = enemy.y + 122;
+		_shadowPlayer2.y = enemy.y + 90;
 
 		orderEntitiesByY();
 
 		//Not working properly, gonna leave it commented out
 		if (FlxG.overlap(weaponAttackAnim, enemy)) {
-			enemyDamaged = true;
+			//enemyDamaged = true;
 		}	
 		
 		if(enemyDamaged == true)
@@ -289,7 +302,7 @@ class PlayState extends FlxState
 
 			new FlxTimer().start(0.3, function(tmr:FlxTimer)
 			{	
-				enemyDamaged = false;
+				//enemyDamaged = false;
 			});
 		}
 
@@ -444,15 +457,15 @@ class PlayState extends FlxState
 	
 		// Position the weapon
 		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
-		weapon.x = _player.x + distanceFromPlayer * Math.cos(theta) - weapon.origin.x + 67;
-		weapon.y = _player.y + distanceFromPlayer * Math.sin(theta) - weapon.origin.y + 105;
+		weapon.x = _player.x + distanceFromPlayer * Math.cos(theta) - weapon.origin.x + 30;
+		weapon.y = _player.y + distanceFromPlayer * Math.sin(theta) - weapon.origin.y + 65;
 	}
 
 	function updateWeaponPositionXY(_player:Player, weapon:FlxSprite):Void 
 	{ 
 		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
-		weapon.x = _player.x + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.x + 67;
-		weapon.y = _player.y + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.y + 105;
+		weapon.x = _player.x + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.x + 30;
+		weapon.y = _player.y + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.y + 65;
 	}
 
 	function onPlayerFollowerOverlap(_player:Player, enemy:Enemy):Void 

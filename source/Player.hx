@@ -42,6 +42,9 @@ class Player extends FlxSprite
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
 		this.animation.addByPrefix("death", "Death", 12, false);
 		this.antialiasing = false;
+		this.width = 75;
+		this.height = 95;
+		this.offset.set(-19, -17);
 		this.scale.set(4, 4);
 
 		drag.x = drag.y = 700;

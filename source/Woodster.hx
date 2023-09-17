@@ -27,6 +27,9 @@ class Woodster extends FlxSprite
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
 		this.animation.addByPrefix("death", "Death.", 12, false);
 		this.antialiasing = false;
+		this.width = 75;
+		this.height = 105;
+		this.offset.set(-23, 9);
 		this.scale.set(4, 4);
     }
 

@@ -23,6 +23,9 @@ class Enemy extends FlxSprite
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
 		this.animation.addByPrefix("death", "Death", 12, false);
 		this.antialiasing = false;
+		this.width = 75;
+		this.height = 95;
+		this.offset.set(-15, -19);
 		this.scale.set(4, 4);
     }
 
