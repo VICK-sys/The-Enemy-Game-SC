@@ -22,6 +22,7 @@ class Player extends FlxSprite
 	private var walkingSound:FlxSound;
 	var walkSound:Bool = false;
 
+	public static var blockMovement:Bool = false;
 
 	/**
 	 * Player class' constructor. Used to set the player's initial position
@@ -48,7 +49,7 @@ class Player extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
-		movement();
+		if (!blockMovement) movement();
 
 		super.update(elapsed);
 	}

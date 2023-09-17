@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="woodster.png">
+	<!-- Made using Maru Aseprite JSON to XML converter -->
+	<SubTexture name="Idle00000" x="0" y="0" width="32" height="48"/>
+	<SubTexture name="Idle00001" x="32" y="0" width="32" height="48"/>
+	<SubTexture name="Idle00002" x="64" y="0" width="32" height="48"/>
+	<SubTexture name="Idle00003" x="96" y="0" width="32" height="48"/>
+	<SubTexture name="Walk00000" x="0" y="48" width="32" height="48"/>
+	<SubTexture name="Walk00001" x="32" y="48" width="32" height="48"/>
+	<SubTexture name="Walk00002" x="64" y="48" width="32" height="48"/>
+	<SubTexture name="Walk00003" x="96" y="48" width="32" height="48"/>
+	<SubTexture name="Walk00004" x="128" y="48" width="32" height="48"/>
+	<SubTexture name="Walk00005" x="160" y="48" width="32" height="48"/>
+	<SubTexture name="Shoot start00000" x="0" y="96" width="32" height="48"/>
+	<SubTexture name="Shoot start00001" x="32" y="96" width="32" height="48"/>
+	<SubTexture name="Shoot start00002" x="64" y="96" width="32" height="48"/>
+	<SubTexture name="Shoot loop00000" x="0" y="144" width="32" height="48"/>
+	<SubTexture name="Shoot loop00001" x="32" y="144" width="32" height="48"/>
+	<SubTexture name="Shoot end00000" x="0" y="192" width="32" height="48"/>
+	<SubTexture name="Shoot end00001" x="32" y="192" width="32" height="48"/>
+	<SubTexture name="Shoot end00002" x="64" y="192" width="32" height="48"/>
+	<SubTexture name="Hurt00000" x="0" y="240" width="32" height="48"/>
+	<SubTexture name="Hurt00001" x="32" y="240" width="32" height="48"/>
+	<SubTexture name="Hurt00002" x="64" y="240" width="32" height="48"/>
+	<SubTexture name="Death.00000" x="0" y="288" width="32" height="48"/>
+	<SubTexture name="Death.00001" x="32" y="288" width="32" height="48"/>
+	<SubTexture name="Death.00002" x="64" y="288" width="32" height="48"/>
+</TextureAtlas>

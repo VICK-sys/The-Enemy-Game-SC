@@ -23,9 +23,12 @@ class PlayState extends FlxState
 
 	private var _follower:Follower;
 
+	private var woodster:Enemies;
+
 	private var _background:FlxSprite;
 	private var _shadowPlayer:FlxSprite;
 	private var _shadowPlayer2:FlxSprite;
+	private var _shadowPlayer3:FlxSprite;
 	private var weapon:FlxSprite;
 	private var weaponAttackAnim:FlxSprite;
 	private var barBackground:FlxSprite;
@@ -38,6 +41,7 @@ class PlayState extends FlxState
 	
 	private var dead:Bool;
 
+	private var iframes:Bool = false;
 
 	static inline var TILE_WIDTH:Int = 16;
 	static inline var TILE_HEIGHT:Int = 16;
@@ -62,6 +66,8 @@ class PlayState extends FlxState
 		// (50, 50) on the screen.
 		FlxG.camera.bgColor = 0xFFFFFFFF;
 
+		Player.blockMovement = false;
+
 		FlxG.debugger.drawDebug = true;
 
 		camUI = new FlxCamera();
@@ -75,7 +81,7 @@ class PlayState extends FlxState
 
 		_collisionMap.loadMapFromCSV("assets/default_auto.txt", "assets/auto_tiles.png", TILE_WIDTH, TILE_HEIGHT, AUTO);
 		_collisionMap.scale.set(4, 4);
-		add(_collisionMap);
+		//add(_collisionMap);
 
 		_player = new Player(350, 350);
 		// Add the player to the scene.
@@ -86,8 +92,14 @@ class PlayState extends FlxState
 		_follower = new Follower(100, 100);  // Starting position of follower
 		_follower.target = _player;          // Set the player as the target to follow
 
+		woodster = new Enemies(100, 100);
+		woodster.target = _player;
+
 		_shadowPlayer2 = new FlxSprite(_follower.x + 10, _follower.y + 48, "assets/images/effects/shadow.png");
 		_shadowPlayer2.scale.set(4, 4);
+
+		_shadowPlayer3 = new FlxSprite(woodster.x, woodster.y, "assets/images/effects/shadow.png");
+		_shadowPlayer3.scale.set(4, 4);
 
 		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/items/mufu_scythe.png");  // Initializing weapon above the player for this example
 		weapon.scale.set(4, 4);
@@ -104,9 +116,11 @@ class PlayState extends FlxState
 		redObject = new FlxSprite(300, 300, "assets/images/characters/red.png");
 		redObject.scale.set(4, 4);
 
+		add(_shadowPlayer3);
 		add(_shadowPlayer2);
 		add(_shadowPlayer);
 		add(_follower);
+		add(woodster);
 		add(_player);
 		add(weapon);
 
@@ -160,6 +174,29 @@ class PlayState extends FlxState
 		// Check for collision between _player and _follower
 		//FlxG.overlap(_player, _follower, onPlayerFollowerOverlap);
 
+		if (FlxG.keys.justPressed.ONE)
+		{
+			decreaseVolume();
+		}
+
+		if (FlxG.keys.justPressed.TWO)
+		{
+			increaseVolume();
+		}
+
+		if (FlxG.keys.justPressed.THREE)
+		{
+			createFollower();
+		}
+
+		if (FlxG.keys.justPressed.FOUR)
+		{
+			health = 2;
+			dead = false;
+			Player.blockMovement = false;
+			_shadowPlayer.visible = true;
+		}
+
 		FlxG.mouse.visible = false;
 
 		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
@@ -170,9 +207,14 @@ class PlayState extends FlxState
 		redObject.updateHitbox();
 		_player.updateHitbox();
 		_follower.updateHitbox();
+		woodster.updateHitbox();
+
 
 		_shadowPlayer.x = _player.x + 57;
 		_shadowPlayer.y = _player.y + 122;
+
+		_shadowPlayer3.x = woodster.x + 57;
+		_shadowPlayer3.y = woodster.y + 185;
 
 		//weaponAttackAnim.origin.x = weapon.origin.x + 20;
 		//weaponAttackAnim.origin.y = weapon.origin.y - 30;
@@ -204,8 +246,29 @@ class PlayState extends FlxState
 			});
 		}*/
 
-		if (FlxG.overlap(redObject, _player)) {
-			health -= 0.025;
+
+		if (FlxG.overlap(redObject, _player)) 
+		{
+			if(!iframes && !dead)
+			{
+				health -= 0.025;
+				_player.animation.play("hurt", false);
+				Player.blockMovement = true;
+
+				new FlxTimer().start(0.5, function(tmr:FlxTimer)
+				{
+					if(!dead)
+					{
+						Player.blockMovement = false;
+						iframes = true;
+					}
+				});
+			}
+
+			if(iframes)
+			{
+				iframes = false;
+			}
 		}	
 
 		// Update weapon position based on mouse and player
@@ -286,31 +349,99 @@ class PlayState extends FlxState
 			}
 		}
 
+		if(health <= 0 && !dead)
+		{
+			_player.animation.play("death", false);//The Animation is not playing in full for whatever reason
+			dead = true;
+		}
+
 		if(health <= 0)
-			{
-				health = 0;
-				_player.animation.play("death");//The Animation is not playing in full for whatever reason
-				remove(_shadowPlayer);
-				remove(weapon);
-				dead = true;
-			}
+		{
+			health = 0;
+			_shadowPlayer.visible = false;
+			remove(weapon);
+			Player.blockMovement = true;
+		}
 	}	
 
 	function orderEntitiesByY():Void {
-		remove(_player);
-		remove(_follower);
-		remove(weapon);
 	
-		if (_player.y < _follower.y) {
+		if (_player.y < _follower.y && _follower.y < woodster.y + 705) {
+
+			remove(_player);
+			remove(_follower);
+			remove(weapon);
+			remove(woodster); 
+
 			add(_player);
 			add(weapon);
 			add(_follower);
-		} else {
+			add(woodster);
+		}
+		else if (_player.y < woodster.y + 70 && woodster.y + 70 < _follower.y) {
+						
+			remove(_player);
+			remove(_follower);
+			remove(weapon);
+			remove(woodster); 
+
+			add(_player);
+			add(weapon);
+			add(woodster);
+			add(_follower);
+		}
+		else if (_follower.y < _player.y && _player.y < woodster.y + 70) {
+						
+			remove(_player);
+			remove(_follower);
+			remove(weapon);
+			remove(woodster); 
+
+			add(_follower);
+			add(_player);
+			add(weapon);
+			add(woodster);
+		}
+		else if (_follower.y < woodster.y + 70 && woodster.y + 70 < _player.y) {
+						
+			remove(_player);
+			remove(_follower);
+			remove(weapon);
+			remove(woodster); 
+
+			add(_follower);
+			add(woodster);
+			add(_player);
+			add(weapon);
+		}
+		else if (woodster.y + 70 < _player.y && _player.y < _follower.y) {
+						
+			remove(_player);
+			remove(_follower);
+			remove(weapon);
+			remove(woodster); 
+
+			add(woodster);
+			add(_player);
+			add(weapon);
+			add(_follower);
+		}
+		else if (woodster.y + 70 < _follower.y && _follower.y < _player.y) {
+						
+			remove(_player);
+			remove(_follower);
+			remove(weapon);
+			remove(woodster); 
+
+			add(woodster);
 			add(_follower);
 			add(_player);
 			add(weapon);
 		}
 	}
+	
+	
+	
 	
 	function updateWeaponPosition(mouseX:Float, mouseY:Float, _player:Player, weapon:FlxSprite):Void 
 	{
@@ -349,6 +480,20 @@ class PlayState extends FlxState
 	
 		// If you want the player to take damage or any other action, add that logic here.
 	}
-		
-		
+
+    function increaseVolume():Void {
+        FlxG.sound.changeVolume(0.1);
+    }
+
+    function decreaseVolume():Void {
+        FlxG.sound.changeVolume(-0.1);
+    }	
+
+	private function createFollower():Void
+	{
+		// Instantiate the new follower object
+		var _follower:Follower = new Follower(100, 100);
+		_follower.target = _player;
+		add(_follower);
+	};
 }
