@@ -197,31 +197,25 @@ class PlayState extends FlxState
 			// Play the hit sound and take damage only if iframes are not active
 			if (!iframes)
 			{
-				// Play the hit sound only once per overlap
-				if(!isCurrentlyOverlapping)
+				// Play the hit sound
+				var hitSoundInstance = FlxG.sound.load("assets/sounds/damaged/hit.ogg");
+				hitSoundInstance.play();
+				
+				// Destroy the sound instance once it's done playing
+				hitSoundInstance.onComplete = function() 
 				{
-					isCurrentlyOverlapping = true; // Set the flag to true
-		
-					// Create a new instance of the sound and play it
-					var hitSoundInstance = FlxG.sound.load("assets/sounds/damaged/hit.ogg");
-					hitSoundInstance.play();
-		
-					// Destroy the sound instance once it's done playing
-					hitSoundInstance.onComplete = function() 
-					{
-						hitSoundInstance.destroy();
-					};
-				}
+					hitSoundInstance.destroy();
+				};
 		
 				// Handle health reduction and animations
-				health -= 0.025;
+				health -= 0.25;
 				_player.animation.play("hurt", false);
 				Player.blockMovement = true;
 		
 				iframes = true; // Set invulnerability
 		
 				// Reset iframes after a short duration (e.g., 0.4 seconds)
-				new FlxTimer().start(0.5, function(tmr:FlxTimer)
+				new FlxTimer().start(0.4, function(tmr:FlxTimer)
 				{
 					iframes = false;
 				});
@@ -235,12 +229,7 @@ class PlayState extends FlxState
 					}
 				});
 			}
-		}
-		else if (!FlxG.overlap(redObject, _player))
-		{
-			isCurrentlyOverlapping = false; // Reset the flag when there's no overlap
-		}
-					
+		}			
 			
 		super.update(elapsed);
 
