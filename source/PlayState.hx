@@ -206,6 +206,19 @@ class PlayState extends FlxState
 				{
 					hitSoundInstance.destroy();
 				};
+
+				// Implementing knockback
+				var knockbackMagnitude = 500; // Adjust this to your needs
+				var knockbackDirection = _player.x > redObject.x ? 1 : -1;
+				_player.velocity.x = knockbackMagnitude * knockbackDirection;
+
+				// Implementing knockback for y-axis
+				var knockbackMagnitudeY = 500; // Adjust this to your needs
+				var knockbackDirectionY = _player.y > redObject.y ? 1 : -1;
+				_player.velocity.y = knockbackMagnitudeY * knockbackDirectionY;
+				
+				// You might also want to introduce a slight vertical knockback for better feel
+				//_player.velocity.y = -20; // This will give a small vertical "jump" feel
 		
 				// Handle health reduction and animations
 				health -= 0.25;
