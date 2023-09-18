@@ -38,15 +38,19 @@ class PlayState extends FlxState
 	private var playerIcon:FlxSprite;
 	private var redObject:FlxSprite;
 
+	private var gotHit:Bool = false;
+
 	private var enemyDamaged:Bool;
 	private var attackSound:Bool = false;
 	var isAttacking:Bool = false;
 
 	private var sixNotPressed = true;
 	
-	public static var dead:Bool;
+	public static var dead:Bool = false;
 
 	private var iframes:Bool = false;
+
+	var isCurrentlyOverlapping:Bool = false;
 
     var enemyTimer:Float = 0;
     var woodsterTimer:Float = 0;
@@ -63,6 +67,8 @@ class PlayState extends FlxState
     static inline var MAX_TIME:Float = 2.0; // 2 seconds, for example
 
 	private var attackingSound:FlxSound;
+
+	public var gotHitSound:FlxSound;
 
 	var _collisionMap:FlxTilemap;
 
@@ -179,11 +185,63 @@ class PlayState extends FlxState
 
 		FlxG.sound.playMusic("assets/music/stage/gloomDoomWoods.ogg", 0.3, true);
 
+		gotHitSound = FlxG.sound.load("assets/sounds/damaged/hit.ogg");
+
 		super.create();
 	}
 
 	override public function update(elapsed:Float):Void 
 	{	
+		if (FlxG.overlap(redObject, _player) && !dead) 
+		{
+			// Play the hit sound and take damage only if iframes are not active
+			if (!iframes)
+			{
+				// Play the hit sound only once per overlap
+				if(!isCurrentlyOverlapping)
+				{
+					isCurrentlyOverlapping = true; // Set the flag to true
+		
+					// Create a new instance of the sound and play it
+					var hitSoundInstance = FlxG.sound.load("assets/sounds/damaged/hit.ogg");
+					hitSoundInstance.play();
+		
+					// Destroy the sound instance once it's done playing
+					hitSoundInstance.onComplete = function() 
+					{
+						hitSoundInstance.destroy();
+					};
+				}
+		
+				// Handle health reduction and animations
+				health -= 0.025;
+				_player.animation.play("hurt", false);
+				Player.blockMovement = true;
+		
+				iframes = true; // Set invulnerability
+		
+				// Reset iframes after a short duration (e.g., 0.4 seconds)
+				new FlxTimer().start(0.5, function(tmr:FlxTimer)
+				{
+					iframes = false;
+				});
+		
+				// Allow movement after a short duration (e.g., 0.1 seconds)
+				new FlxTimer().start(0.1, function(tmr:FlxTimer)
+				{
+					if(!dead)
+					{
+						Player.blockMovement = false;
+					}
+				});
+			}
+		}
+		else if (!FlxG.overlap(redObject, _player))
+		{
+			isCurrentlyOverlapping = false; // Reset the flag when there's no overlap
+		}
+					
+			
 		super.update(elapsed);
 
         enemyTimer -= elapsed;
@@ -276,9 +334,6 @@ class PlayState extends FlxState
 		_shadowPlayer4.x = likWid.x + 33;
 		_shadowPlayer4.y = likWid.y + 73;
 
-		//weaponAttackAnim.origin.x = weapon.origin.x + 20;
-		//weaponAttackAnim.origin.y = weapon.origin.y - 30;
-
 		if(enemy.flipX == true)
 		{
 			_shadowPlayer2.x = enemy.x + 22;
@@ -306,31 +361,6 @@ class PlayState extends FlxState
 			});
 		}
 
-
-		if (FlxG.overlap(redObject, _player)) 
-		{
-			if(!iframes && !dead)
-			{
-				health -= 0.025;
-				_player.animation.play("hurt", false);
-				Player.blockMovement = true;
-
-				new FlxTimer().start(0.5, function(tmr:FlxTimer)
-				{
-					if(!dead)
-					{
-						Player.blockMovement = false;
-						iframes = true;
-					}
-				});
-			}
-
-			if(iframes)
-			{
-				iframes = false;
-			}
-		}	
-
 		// Update weapon position based on mouse and player
 		if(!isAttacking)
 		{
@@ -353,7 +383,6 @@ class PlayState extends FlxState
 			FlxTween.tween(weaponAttackAnim, {x: FlxG.mouse.screenX, y: FlxG.mouse.screenY}, 0.3, {ease: FlxEase.quintOut}); //TODO: Fix the range of this cuz rn is just going to mouse position
 			weaponAttackAnim.animation.play("swordAttack", false);
 			weaponAttackAnim.angle = weapon.angle;
-
 
 			if(!attackSound)
 			{

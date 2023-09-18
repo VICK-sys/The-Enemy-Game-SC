@@ -54,6 +54,17 @@ class Player extends FlxSprite
 	{
 		if (!blockMovement) movement();
 
+		// Check if the character is dead at the very beginning
+		if(PlayState.dead)
+		{
+			if(walkSound)
+			{
+				walkingSound.looped = false;
+				walkingSound.stop();
+				walkSound = false;   // Reset the flag
+			}
+		}
+
 		super.update(elapsed);
 	}
 
@@ -88,7 +99,7 @@ class Player extends FlxSprite
 		{
 			var newAngle:Float = 0;
 
-			if(!walkSound)
+			if(!walkSound && !PlayState.dead)
 			{
 				var soundOptions:Array<String> = [
 					"assets/sounds/walk/wave.ogg"
