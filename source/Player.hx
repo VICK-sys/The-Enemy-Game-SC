@@ -18,7 +18,8 @@ class Player extends FlxSprite
 	// A constant to represent how fast the player can move.
 	static inline var MOVEMENT_SPEED:Float = 450;
 	var intialSpeed:Float = 50;
-	var velocityTween:VarTween;
+
+	//Sounds For Walking
 	private var walkingSound:FlxSound;
 	var walkSound:Bool = false;
 

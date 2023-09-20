@@ -19,69 +19,76 @@ class PlayState extends FlxState
 {
 	// A class variable to represent the character in this
 	// scene.
+
+	//Player and Opponent Variables
 	private var _player:Player;
-
 	private var enemy:Enemy;
-
 	private var woodster:Woodster;
-
 	private var likWid:LikWid;
 
 	private var _background:FlxSprite;
+
+	//Shadows for players
 	private var _shadowPlayer:FlxSprite;
 	private var _shadowPlayer2:FlxSprite;
 	private var _shadowPlayer3:FlxSprite;
 	private var _shadowPlayer4:FlxSprite;
-	private var weapon:FlxSprite;
+	
+	//scythe Variables
+	private var scythe:FlxSprite;
+	private var bow:FlxSprite;
+	private var hammer:FlxSprite;
+	private var hook:FlxSprite;
 	private var weaponAttackAnim:FlxSprite;
+	private var attacked:Bool = false;
+	var recoilProcessed:Bool;
+
+	//UI Variables
 	private var barBackground:FlxSprite;
 	private var playerIcon:FlxSprite;
-	private var redObject:FlxSprite;
-
-	private var gotHit:Bool = false;
-
-	private var enemyDamaged:Bool;
-	private var attackSound:Bool = false;
-	var isAttacking:Bool = false;
-
-	private var sixNotPressed = true;
-	
-	public static var dead:Bool = false;
-
-	private var iframes:Bool = false;
-
-	var isCurrentlyOverlapping:Bool = false;
-
-    var enemyTimer:Float = 0;
-    var woodsterTimer:Float = 0;
-    var likWidTimer:Float = 0;
-
-	static inline var TILE_WIDTH:Int = 16;
-	static inline var TILE_HEIGHT:Int = 16;
-	private var startAttackAngle:Float;
-	public var health:Float = 2;
-	var attackSpeed:Float = 760;
-	var attackAngle:Float = 180;  // This is the angle by which you want to rotate the weapon when attacking
-
-	    // Constants for the max time an entity will move in one direction
-    static inline var MAX_TIME:Float = 2.0; // 2 seconds, for example
-
-	private var attackingSound:FlxSound;
-
-	public var gotHitSound:FlxSound;
-
-	var _collisionMap:FlxTilemap;
-
+	private var customCursor:FlxSprite;
+	public var passiveRed:FlxSprite;
+	public var passiveBlue:FlxSprite;
+	public var activeBlue:FlxSprite;
+	public var activeRed:FlxSprite;
 	public var bar:FlxBar;
-
+	public var barCardBlue:FlxBar;
+	public var barCardRed:FlxBar;
 	public var camUI:FlxCamera;
 
-	private var customCursor:FlxSprite;
+	//Damage Object For Testing
+	private var redObject:FlxSprite;
+
+	//Collision Variables
+	private var enemyDamaged:Bool;
+	private var attackSound:Bool = false;
+	private var isAttacking:Bool = false;
+	private var iframes:Bool = false;
+	private var attackingSound:FlxSound;
+	public var health:Float = 2;
+	public var itemBar:Float = 2;
+	public static var dead:Bool = false;
+
+	//Variable For Hitbox Debugging
+	private var sixNotPressed = true;
+
+	//Tile Variables
+	static inline var TILE_WIDTH:Int = 16;
+	static inline var TILE_HEIGHT:Int = 16;
+	private var _collisionMap:FlxTilemap;
+
+	//Opponent Variables For Checking AI
+	private var enemyTimer:Float = 0;
+    private var woodsterTimer:Float = 0;
+    private var likWidTimer:Float = 0;
+    static inline var MAX_TIME:Float = 2.0; //Constants for the max time an entity will move in one direction. 2 seconds, for example.
 
 	override public function create()
 	{
 		// Create a new instance of the player at the point
 		// (50, 50) on the screen.
+
+		//Making sure the camera color is clear
 		FlxG.camera.bgColor = 0xFFFFFFFF;
 
 		Player.blockMovement = false;
@@ -120,8 +127,8 @@ class PlayState extends FlxState
 		_shadowPlayer4 = new FlxSprite(likWid.x, likWid.y, "assets/images/effects/shadow.png");
 		_shadowPlayer4.scale.set(7, 4);
 
-		weapon = new FlxSprite(_player.x, _player.y - 50, "assets/images/items/mufu_scythe.png");  // Initializing weapon above the player for this example
-		weapon.scale.set(4, 4);
+		scythe = new FlxSprite(_player.x, _player.y - 50, "assets/images/items/mufu_scythe.png");  // Initializing scythe above the player for this example
+		scythe.scale.set(4, 4);
 
 		weaponAttackAnim = new FlxSprite(0, 0, "assets/images/effects/attacks_gfx.png");
 		weaponAttackAnim.frames = FlxAtlasFrames.fromSparrow("assets/images/effects/attacks_gfx.png", "assets/images/effects/attacks_gfx.xml");
@@ -135,28 +142,51 @@ class PlayState extends FlxState
 		redObject = new FlxSprite(300, 300, "assets/images/characters/red.png");
 		redObject.scale.set(4, 4);
 
+		//Setting Up Layering For Shadows
 		add(_shadowPlayer4);
-		add(_shadowPlayer3);
 		add(_shadowPlayer2);
+		add(_shadowPlayer3);
 		add(_shadowPlayer);
+
+		//Setting Up Layering For Player and Opponent
 		add(enemy);
 		add(woodster);
 		add(likWid);
 		add(_player);
-		add(weapon);
 
+		add(scythe);
 
 		add(redObject);
 
-		weapon.origin.set(weapon.width * 0.5, weapon.height);
+		scythe.origin.set(scythe.width * 0.5, scythe.height);
 
-		//weaponAttackAnim.origin.set(weapon.width / 2, weapon.height / 2);
-
+		//Un-Manipulated HealthBar Texture
 		barBackground = new FlxSprite(160, 670, "assets/images/ui/bar_red.png");
 		barBackground.antialiasing = false;
 		barBackground.scale.set(4, 4);
 		barBackground.cameras = [camUI];
 
+		activeBlue = new FlxSprite(160, 670, "assets/images/ui/active_blue.png");
+		activeBlue.antialiasing = false;
+		activeBlue.scale.set(4, 4);
+		activeBlue.cameras = [camUI];
+
+		activeRed = new FlxSprite(1060, 670, "assets/images/ui/active_red.png");
+		activeRed.antialiasing = false;
+		activeRed.scale.set(4, 4);
+		activeRed.cameras = [camUI];
+
+		passiveBlue = new FlxSprite(160, 670, "assets/images/ui/pasive_blue.png");
+		passiveBlue.antialiasing = false;
+		passiveBlue.scale.set(4, 4);
+		passiveBlue.cameras = [camUI];
+
+		passiveRed = new FlxSprite(1150, 670, "assets/images/ui/pasive_red.png");
+		passiveRed.antialiasing = false;
+		passiveRed.scale.set(4, 4);
+		passiveRed.cameras = [camUI];
+
+		//Manipulated HealthBar Texture
 		bar = new FlxBar(barBackground.x, barBackground.y, LEFT_TO_RIGHT, Std.int(barBackground.width), Std.int(barBackground.height), this, 'health', 0, 2);
 		bar.createImageBar("assets/images/ui/bar_main_empty.png", "assets/images/ui/bar_red.png", FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
 		bar.updateBar();
@@ -164,12 +194,33 @@ class PlayState extends FlxState
 		bar.scale.set(4, 4);
 		bar.cameras = [camUI];
 
+		barCardBlue = new FlxBar(activeBlue.x, activeBlue.y, LEFT_TO_RIGHT, Std.int(activeBlue.width), Std.int(activeBlue.height), this, 'itemBar', 0, 2);
+		barCardBlue.createImageBar("assets/images/ui/active_empty.png", "assets/images/ui/active_blue.png", FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
+		barCardBlue.updateBar();
+		barCardBlue.antialiasing = false;
+		barCardBlue.scale.set(4, 4);
+		barCardBlue.cameras = [camUI];
+
+		barCardRed = new FlxBar(activeRed.x, activeRed.y, LEFT_TO_RIGHT, Std.int(activeRed.width), Std.int(activeRed.height), this, 'itemBar', 0, 2);
+		barCardRed.createImageBar("assets/images/ui/active_empty.png", "assets/images/ui/active_red.png", FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
+		barCardRed.updateBar();
+		barCardRed.antialiasing = false;
+		barCardRed.scale.set(4, 4);
+		barCardRed.cameras = [camUI];
+
 		playerIcon = new FlxSprite(barBackground.x - 120, barBackground.y, "assets/images/ui/mufu_icon.png");
 		playerIcon.scale.set(4, 4);
 		playerIcon.cameras = [camUI];
 
+
+
 		add(barBackground);
 		add(bar);
+
+		add(activeRed);
+		add(passiveRed);
+		add(passiveRed);
+
 
 		add(playerIcon);
 
@@ -184,8 +235,6 @@ class PlayState extends FlxState
 		add(customCursor);
 
 		FlxG.sound.playMusic("assets/music/stage/gloomDoomWoods.ogg", 0.3, true);
-
-		gotHitSound = FlxG.sound.load("assets/sounds/damaged/hit.ogg");
 
 		super.create();
 	}
@@ -208,17 +257,14 @@ class PlayState extends FlxState
 				};
 
 				// Implementing knockback
-				var knockbackMagnitude = 500; // Adjust this to your needs
+				var knockbackMagnitude = 300; // Adjust this to your needs
 				var knockbackDirection = _player.x > redObject.x ? 1 : -1;
 				_player.velocity.x = knockbackMagnitude * knockbackDirection;
 
 				// Implementing knockback for y-axis
-				var knockbackMagnitudeY = 500; // Adjust this to your needs
+				var knockbackMagnitudeY = 300; // Adjust this to your needs
 				var knockbackDirectionY = _player.y > redObject.y ? 1 : -1;
 				_player.velocity.y = knockbackMagnitudeY * knockbackDirectionY;
-				
-				// You might also want to introduce a slight vertical knockback for better feel
-				//_player.velocity.y = -20; // This will give a small vertical "jump" feel
 		
 				// Handle health reduction and animations
 				health -= 0.25;
@@ -274,10 +320,7 @@ class PlayState extends FlxState
 			}
 		}
 
-		// Check for collision between _player and enemy
-		//FlxG.overlap(_player, enemy, onPlayerFollowerOverlap);
-
-		if (FlxG.keys.justPressed.ONE)
+		if (FlxG.keys.justPressed.ONE)//Rofel wanted these binds cuz his volume keys don't work
 		{
 			decreaseVolume();
 		}
@@ -292,12 +335,13 @@ class PlayState extends FlxState
 			createFollower();
 		}
 
-		if (FlxG.keys.justPressed.FIVE)
+		if (FlxG.keys.justPressed.FIVE)//Kills Player
 		{
 			health = 0;
+			itemBar = 0;
 		}
 
-		if (FlxG.keys.justPressed.SIX)
+		if (FlxG.keys.justPressed.SIX)//Shows Sprite Hitboxes
 		{
 			if (sixNotPressed)
 			{
@@ -310,9 +354,10 @@ class PlayState extends FlxState
 			}
 		}
 		
-		if (FlxG.keys.justPressed.FOUR)
+		if (FlxG.keys.justPressed.FOUR)//Revives player and gives full health
 		{
 			health = 2;
+			itemBar = 2;
 			dead = false;
 			Player.blockMovement = false;
 			_shadowPlayer.visible = true;
@@ -322,7 +367,7 @@ class PlayState extends FlxState
 
 		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
 
-		updateWeaponPositionXY(_player, weapon);
+		updateWeaponPositionXY(_player, scythe);
 
 		redObject.updateHitbox();
 
@@ -349,7 +394,8 @@ class PlayState extends FlxState
 		orderEntitiesByY();
 
 		//Not working properly, gonna leave it commented out
-		if (FlxG.overlap(weaponAttackAnim, enemy)) {
+		//Most likely going to refactor this similarly to how the player is damaged
+		/*if (FlxG.overlap(weaponAttackAnim, enemy)) {
 			//enemyDamaged = true;
 		}	
 		
@@ -361,30 +407,29 @@ class PlayState extends FlxState
 			{	
 				//enemyDamaged = false;
 			});
-		}
+		}*/
 
-		// Update weapon position based on mouse and player
+		// Update scythe position based on mouse and player
 		if(!isAttacking)
 		{
-			updateWeaponPosition(FlxG.mouse.screenX, FlxG.mouse.screenY, _player, weapon);
+			updateWeaponPosition(FlxG.mouse.screenX, FlxG.mouse.screenY, _player, scythe);
 			weaponAttackAnim.x = _player.x - 75;
 			weaponAttackAnim.y = _player.y - 50;
 		}
 	
 		// Check for a single mouse click to start the attack
-		if (FlxG.mouse.justPressed && !isAttacking && !dead)
+		if (FlxG.mouse.justPressed && !isAttacking && !dead)//Big old player attacking if statement. I might refactor this into a function.
 		{
 			isAttacking = true;
 
-			// Parameters: Intensity of the shake (0 to 1), Duration of the shake in seconds
-			//FlxG.camera.shake(0.005, 0.5);
+			attacked = true;
 
 			add(weaponAttackAnim);
 
 			weaponAttackAnim.visible = true;
 			FlxTween.tween(weaponAttackAnim, {x: FlxG.mouse.screenX, y: FlxG.mouse.screenY}, 0.3, {ease: FlxEase.quintOut}); //TODO: Fix the range of this cuz rn is just going to mouse position
 			weaponAttackAnim.animation.play("swordAttack", false);
-			weaponAttackAnim.angle = weapon.angle;
+			weaponAttackAnim.angle = scythe.angle;
 
 			if(!attackSound)
 			{
@@ -407,18 +452,56 @@ class PlayState extends FlxState
 				attackSound = true;
 			}
 			
-			// Store the current angle as the starting angle for the attack
-			//var startAttackAngle:Float = weapon.angle;
-			
-			weapon.angle += 120;
+			scythe.angle += 120;
 
-			if(weapon.flipX == true)
+			if(_player.flipX == false && scythe.flipX == false)
+				{
+					scythe.flipX = true;
+					if(recoilProcessed == true)
+					{
+						recoilProcessed = false;
+					}
+					else
+					{
+						recoilProcessed = true;
+					}
+				}
+				else if(_player.flipX == false && scythe.flipX == true)
+				{
+					scythe.flipX = false;
+					if(recoilProcessed == true)
+					{
+						recoilProcessed = false;
+					}
+					else
+					{
+						recoilProcessed = true;
+					}
+				}
+			
+			if(_player.flipX == true && scythe.flipX == false)
 			{
-				weapon.flipX = false;
+				scythe.flipX = true;
+				if(recoilProcessed == true)
+				{
+					recoilProcessed = false;
+				}
+				else
+				{
+					recoilProcessed = true;
+				}
 			}
-			else
+			else if(_player.flipX == true && scythe.flipX == true)
 			{
-				weapon.flipX = true;
+				scythe.flipX = false;
+				if(recoilProcessed == true)
+				{
+					recoilProcessed = false;
+				}
+				else
+				{
+					recoilProcessed = true;
+				}
 			}
 
 			new FlxTimer().start(0.1, function(tmr:FlxTimer)
@@ -440,26 +523,26 @@ class PlayState extends FlxState
 			}
 		}
 
-		if(health <= 0 && !dead)
+		if(health <= 0 && !dead)//Plays death animation when player dies
 		{
-			_player.animation.play("death", false);//The Animation is not playing in full for whatever reason
+			_player.animation.play("death", false);
 			dead = true;
 		}
 
-		if(health <= 0)
+		if(health <= 0)//Makes sure you can't attack when you die
 		{
 			health = 0;
 			_shadowPlayer.visible = false;
-			remove(weapon);
+			remove(scythe);
 			Player.blockMovement = true;
 		}
 	}	
 
-	//I'll have to tweak this function since its not working 100%
+	//Function to sort out entity layering based on hitbox y axis
 	function orderEntitiesByY():Void {
 		remove(_player);
 		remove(enemy);
-		remove(weapon);
+		remove(scythe);
 		remove(woodster);
 		remove(likWid);
 	
@@ -467,49 +550,86 @@ class PlayState extends FlxState
 		entities.sort(function(a, b) return a.y - b.y);
 	
 		for(entity in entities) {
-			if(entity == _player) {
-				add(weapon);
-			}
 			add(entity);
+			if(entity == _player) {
+				add(scythe);
+			}
 		}
 	}
 	
-	function updateWeaponPosition(mouseX:Float, mouseY:Float, _player:Player, weapon:FlxSprite):Void 
+	//This function is weird. It works as intended, but when the player attacks, the angle of the scythe is supposed to change
+	//to a relative down position. Instead, it tracks the current angle, and the scythe returns to its previous position after initiating.
+	/*function updateWeaponPosition(mouseX:Float, mouseY:Float, _player:Player, scythe:FlxSprite):Void 
 	{
 		// Calculate the angle   
 		var dy:Float = mouseY - _player.y;
 		var dx:Float = mouseX - _player.x;
 		var theta:Float = Math.atan2(dy, dx);
 	
-		// Set the weapon's rotation angle
-		weapon.angle = theta * (180 / Math.PI);  // Convert the angle from radians to degrees
+		// Set the scythe's rotation angle
+		scythe.angle = theta * (180 / Math.PI);  // Convert the angle from radians to degrees
 
-		weaponAttackAnim.angle = weapon.angle;
+		weaponAttackAnim.angle = scythe.angle;
 	
-		// Position the weapon
+		// Position the scythe
 		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
-		weapon.x = _player.x + distanceFromPlayer * Math.cos(theta) - weapon.origin.x + 30;
-		weapon.y = _player.y + distanceFromPlayer * Math.sin(theta) - weapon.origin.y + 65;
+		scythe.x = _player.x + distanceFromPlayer * Math.cos(theta) - scythe.origin.x + 30;
+		scythe.y = _player.y + distanceFromPlayer * Math.sin(theta) - scythe.origin.y + 65;
+	}*/
+
+	var recoilAngle:Float = 0; // This variable is probably better as a member variable of the class
+
+	function updateWeaponPosition(mouseX:Float, mouseY:Float, _player:Player, scythe:FlxSprite):Void 
+	{
+		// Calculate the angle   
+		var dy:Float = mouseY - _player.y;
+		var dx:Float = mouseX - _player.x;
+		var theta:Float = Math.atan2(dy, dx);
+		
+		// Handle recoil
+		// This rotation thing still needs some work
+		// RecoilAngle should adjust when the player flips direction
+		if (recoilProcessed && _player.flipX == true) 
+		{ 
+			recoilAngle = 180;
+		}
+
+		if (recoilProcessed && _player.flipX == false) 
+		{ 
+			recoilAngle = 130;
+		}
+
+		if (!recoilProcessed && _player.flipX == false) 
+		{ 
+			recoilAngle = 0;
+		}
+
+		if (!recoilProcessed && _player.flipX == true) 
+		{ 
+			recoilAngle = 0;
+		}
+			
+		
+		recoilAngle = MathHelper.Lerp(recoilAngle, 0, 0.1); // Gradually return the scythe back to its normal position. The value 0.1 determines the speed.
+
+		// Set the scythe's rotation angle
+		scythe.angle = (theta * (180 / Math.PI)) + recoilAngle;  // Convert the angle from radians to degrees and apply the recoil
+
+		weaponAttackAnim.angle = scythe.angle;
+		
+		// Position the scythe
+		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
+		scythe.x = _player.x + distanceFromPlayer * Math.cos(theta) - scythe.origin.x + 30;
+		scythe.y = _player.y + distanceFromPlayer * Math.sin(theta) - scythe.origin.y + 65;
 	}
 
-	function updateWeaponPositionXY(_player:Player, weapon:FlxSprite):Void 
+
+	//Makes sure the scythe's X and Y position is still being tracked when the player is moving
+	function updateWeaponPositionXY(_player:Player, scythe:FlxSprite):Void 
 	{ 
 		var distanceFromPlayer:Float = 0;  // Adjust this value based on your game's needs
-		weapon.x = _player.x + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.x + 30;
-		weapon.y = _player.y + distanceFromPlayer /** Math.cos(theta)*/ - weapon.origin.y + 65;
-	}
-
-	function onPlayerFollowerOverlap(_player:Player, enemy:Enemy):Void 
-	{
-		// Handle the collision here. For example, you can stop the follower or make the player take damage.
-		// This is just an example, you can customize the behavior as needed.
-		trace("Overlap detected!");
-		enemy.velocity.x = 0;
-		enemy.velocity.y = 0;
-		_player.velocity.x = 0;
-		_player.velocity.y = 0;
-	
-		// If you want the player to take damage or any other action, add that logic here.
+		scythe.x = _player.x + distanceFromPlayer - scythe.origin.x + 30;
+		scythe.y = _player.y + distanceFromPlayer - scythe.origin.y + 65;
 	}
 
     function increaseVolume():Void {
@@ -525,8 +645,12 @@ class PlayState extends FlxState
         entity.velocity.y = Math.random() * 200 - 100;
     }
 
-	private function createFollower():Void
+	private function createFollower():Void //Creates Enemy Shadow Clones
 	{
+		var shadow = new FlxSprite(enemy.x + 10, enemy.y + 48, "assets/images/effects/shadow.png");
+		shadow.scale.set(4, 4);
+		add(shadow);
+
 		// Instantiate the new follower object
 		var enemy:Enemy = new Enemy(100, 100);
 		enemy.target = _player;
